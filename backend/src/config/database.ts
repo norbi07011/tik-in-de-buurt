@@ -83,26 +83,6 @@ class DatabaseManager {
     });
 
     mongoose.connection.on('disconnected', () => {
-      
-      if (this.connectionAttempts < this.maxRetries) {
-        const retryDelay = config.DB_RETRY_DELAY_MS || 1500;
-        console.log(`⏳ Retrying in ${retryDelay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        return this.connect();
-      } else {
-        console.log('🔄 Max retries reached - falling back to local data mode');
-        await this.initializeLocalMode();
-        return false;
-      }
-    }
-  }
-
-  private setupEventListeners(): void {
-    mongoose.connection.on('error', (error) => {
-      console.error('🔥 MongoDB connection error:', error);
-    });
-
-    mongoose.connection.on('disconnected', () => {
       console.log('⚠️  MongoDB disconnected');
     });
 
