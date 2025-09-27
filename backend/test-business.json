@@ -1,0 +1,19 @@
+{
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "email": "jan.kowalski@test.com",
+  "password": "password123",
+  "businessName": "Test Business",
+  "category": "restaurant",
+  "description": "Test business description",
+  "address": {
+    "street": "Testowa 1",
+    "city": "Warszawa",
+    "zipCode": "00-001"
+  },
+  "legalInfo": {
+    "taxId": "1234567890",
+    "regon": "123456789",
+    "businessType": "sp_z_oo"
+  }
+}

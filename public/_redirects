@@ -1,0 +1,6 @@
+# Netlify redirects file (backup to netlify.toml)
+# SPA routing - redirect all non-API routes to index.html
+/*    /index.html   200
+
+# API proxy (if needed)
+/api/*  https://your-backend-domain.com/api/:splat  200!

@@ -1,0 +1,8 @@
+{
+  "name": "Tik in de buurt",
+  "description": "A futuristic marketing platform for local businesses, showcasing video and image ads in a vertical feed, filtered by city. This initial version sets up the multilingual frontend foundation.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

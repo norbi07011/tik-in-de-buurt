@@ -1,0 +1,6 @@
+/* VideoUploader Progress Bar Styles */
+
+.progress-fill {
+  width: var(--upload-progress, 0%);
+  transition: width 0.3s ease;
+}
