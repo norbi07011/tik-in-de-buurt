@@ -39,8 +39,12 @@ import ThemeToggle from '../components/ThemeToggle';
 
 const Logo: React.FC = () => (
     <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-[var(--primary)] rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-[var(--primary-text)] font-extrabold text-xl">T</span>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <img 
+                src="/images/logo.jpg" 
+                alt="Tik in de buurt logo" 
+                className="w-full h-full object-cover"
+            />
         </div>
         <div>
             <h1 className="text-base sm:text-lg font-bold tracking-wide text-[var(--text-primary)] leading-tight whitespace-nowrap">
