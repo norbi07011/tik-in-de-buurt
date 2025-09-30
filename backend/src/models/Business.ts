@@ -13,6 +13,23 @@ export interface IService {
   description?: string;
 }
 
+export interface ISubscription {
+  planId: string;
+  status: 'active' | 'inactive' | 'expired' | 'past_due' | 'canceled';
+  startDate: Date;
+  endDate: Date;
+  paymentMethod: string;
+  paymentStatus: 'paid' | 'pending' | 'failed';
+  lastPayment?: Date;
+  autoRenewal: boolean;
+  metadata?: {
+    discountCode?: string;
+    originalPrice?: number;
+    discountType?: string;
+    freeMonths?: number | null;
+  };
+}
+
 export interface IBusiness extends Document {
   ownerId: mongoose.Types.ObjectId;
   name: string;
@@ -34,6 +51,7 @@ export interface IBusiness extends Document {
   kvkNumber?: string;
   btwNumber?: string;
   iban?: string;
+  subscription?: ISubscription;
   subscriptionStatus: 'active' | 'inactive' | 'expired' | 'past_due' | 'canceled';
   subscriptionExpiresAt?: Date;
   planId?: string;
@@ -115,6 +133,33 @@ const businessSchema = new Schema<IBusiness>({
   kvkNumber: String,
   btwNumber: String,
   iban: String,
+  subscription: {
+    planId: String,
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'expired', 'past_due', 'canceled'],
+      default: 'inactive'
+    },
+    startDate: Date,
+    endDate: Date,
+    paymentMethod: String,
+    paymentStatus: {
+      type: String,
+      enum: ['paid', 'pending', 'failed'],
+      default: 'pending'
+    },
+    lastPayment: Date,
+    autoRenewal: {
+      type: Boolean,
+      default: true
+    },
+    metadata: {
+      discountCode: String,
+      originalPrice: Number,
+      discountType: String,
+      freeMonths: Number
+    }
+  },
   subscriptionStatus: {
     type: String,
     enum: ['active', 'inactive', 'expired', 'past_due', 'canceled'],

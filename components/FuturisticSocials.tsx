@@ -45,12 +45,10 @@ const FuturisticSocials: React.FC<SocialsProps> = ({ socials }) => {
                         hover:w-28 hover:h-48 lg:hover:w-32 lg:hover:h-52
                         drop-shadow-[0_0_8px_rgba(255,0,255,0.4)] hover:drop-shadow-[0_0_20px_rgba(255,0,255,0.7)]">
             
-            <div className="absolute inset-0 bg-black transition-all duration-500 ease-in-out" 
-                 style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 10%, 100% 90%, 80% 100%, 20% 100%, 0 90%, 0 10%)' }} />
+            <div className="absolute inset-0 bg-black transition-all duration-500 ease-in-out futuristic-clip" />
 
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200 flex flex-col items-center justify-start pt-6">
-                <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-600 via-purple-800 to-black opacity-80"
-                     style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 10%, 100% 90%, 80% 100%, 20% 100%, 0 90%, 0 10%)' }}/>
+                <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-600 via-purple-800 to-black opacity-80 futuristic-clip"/>
                 
                 <h3 className="relative z-10 text-white font-bold text-sm lg:text-base tracking-widest uppercase">
                     SOCIALS

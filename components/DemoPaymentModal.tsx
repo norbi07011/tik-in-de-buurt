@@ -126,6 +126,8 @@ const DemoPaymentModal: React.FC<DemoPaymentModalProps> = ({
             <button
               onClick={() => { onClose(); resetModal(); }}
               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1"
+              title="Zamknij"
+              aria-label="Zamknij modal płatności"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>

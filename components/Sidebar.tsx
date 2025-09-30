@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useStore } from '../src/store';
 import { useAuth } from '../src/contexts/AuthContext';
 import { Page } from '../src/types';
-import {
+import AdminDiscountPanel from './AdminDiscountPanel';
+  import {
   HomeModernIcon as HomeIcon,
   SparklesIcon,
   ChatBubbleOvalLeftEllipsisIcon,
@@ -15,21 +16,33 @@ import {
   BookmarkIcon,
   VideoCameraIcon,
   PencilSquareIcon,
+  MapIcon,
+  UserIcon,
+  MagnifyingGlassIcon,
+  Euro,
 } from './icons/Icons';
 
 const SidebarLink: React.FC<{
   page: Page;
-  id?: number;
+  id?: number | string;
+  userId?: string;
   icon: React.ReactNode;
   text: string;
   isExpanded: boolean;
-}> = ({ page, id, icon, text, isExpanded }) => {
-  const { currentPage, activeBusinessId, navigate } = useStore();
-  const isActive = currentPage === page && (!id || activeBusinessId === id);
+}> = ({ page, id, userId, icon, text, isExpanded }) => {
+  const { currentPage, activeBusinessId, activeUserId, navigate } = useStore();
+  const isActive = currentPage === page && (!id || activeBusinessId === id) && (!userId || activeUserId === userId);
 
   return (
     <button
-      onClick={() => navigate(page, id)}
+      onClick={() => {
+        if (userId) {
+          navigate(page, null, userId);
+        } else {
+          const numericId = typeof id === 'string' ? parseInt(id) : id;
+          navigate(page, numericId);
+        }
+      }}
       className={`sidebar-link ${isActive ? 'active' : ''}`}
       title={isExpanded ? '' : text}
     >
@@ -44,7 +57,11 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
   const { navigate, showToast } = useStore();
   const { logout, user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Check if current user is admin
+  const isAdmin = user?.email === 'odzeradomilionera708@gmail.com';
 
   useEffect(() => {
     const node = sidebarRef.current;
@@ -74,10 +91,15 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
   if (user.businessId) {
     const mainLinks = [
         { page: Page.Dashboard, icon: <HomeIcon />, text: t('dashboard') },
+        { page: Page.Search, icon: <MagnifyingGlassIcon />, text: 'Zaawansowane Wyszukiwanie' },
+        { page: Page.Payment, icon: <CreditCardIcon />, text: '💳 System Płatności' },
+        { page: Page.Geolocation, icon: <MapIcon />, text: '📍 Enhanced Geolocation' },
         { page: Page.BusinessProfile, id: user.businessId, icon: <BuildingStorefrontIcon />, text: t('my_business') },
         { page: Page.LiveStream, icon: <VideoCameraIcon />, text: t('live_stream_title') },
         { page: Page.Reviews, icon: <ChatBubbleOvalLeftEllipsisIcon />, text: t('manage_reviews') },
         { page: Page.MarketingServices, icon: <SparklesIcon />, text: t('marketing_services') },
+        { page: Page.OpenStreetMapDemo, icon: <MapIcon />, text: '🗺️ OpenStreetMap Demo' },
+        { page: Page.AdvancedFeaturesDemo, icon: <SparklesIcon />, text: '🚀 Advanced Features' },
     ];
     const bottomLinks = [
         { page: Page.Settings, icon: <Cog6ToothIcon />, text: t('settings') },
@@ -101,6 +123,16 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
                     {bottomLinks.map((link) => (
                         <SidebarLink key={link.page} {...link} isExpanded={isExpanded} />
                     ))}
+                    {isAdmin && (
+                        <button
+                            onClick={() => setShowAdminPanel(true)}
+                            className="sidebar-link"
+                            title={isExpanded ? '' : 'Admin Panel'}
+                        >
+                            <span className="w-6 h-6 flex-shrink-0"><Euro /></span>
+                            <span className="sidebar-link-text">Admin Panel</span>
+                        </button>
+                    )}
                 </div>
                 <button
                 onClick={async () => {
@@ -122,6 +154,10 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
             className={`sidebar-overlay lg:hidden ${isOpen ? 'active' : ''}`}
             onClick={onClose}
         />
+        <AdminDiscountPanel 
+            isVisible={showAdminPanel} 
+            onClose={() => setShowAdminPanel(false)} 
+        />
         </>
     );
   }
@@ -130,8 +166,13 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
   if (user.freelancerId) {
      const freelancerLinks = [
         { page: Page.FreelancerProfile, id: user.freelancerId, icon: <BuildingStorefrontIcon />, text: t('my_profile') },
+        { page: Page.Search, icon: <MagnifyingGlassIcon />, text: 'Zaawansowane Wyszukiwanie' },
+        { page: Page.Payment, icon: <CreditCardIcon />, text: '💳 System Płatności' },
+        { page: Page.Geolocation, icon: <MapIcon />, text: '📍 Enhanced Geolocation' },
         { page: Page.EditFreelancerCV, icon: <PencilSquareIcon />, text: t('edit_cv') },
         { page: Page.Saved, icon: <BookmarkIcon />, text: t('saved') },
+        { page: Page.OpenStreetMapDemo, icon: <MapIcon />, text: '🗺️ OpenStreetMap Demo' },
+        { page: Page.AdvancedFeaturesDemo, icon: <SparklesIcon />, text: '🚀 Advanced Features' },
         { page: Page.Support, icon: <LifebuoyIcon />, text: t('support') },
     ];
      return (
@@ -151,6 +192,16 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
             {freelancerLinks.map((link) => (
               <SidebarLink key={link.page} {...link} isExpanded={isExpanded} />
             ))}
+            {isAdmin && (
+                <button
+                    onClick={() => setShowAdminPanel(true)}
+                    className="sidebar-link"
+                    title={isExpanded ? '' : 'Admin Panel'}
+                >
+                    <span className="w-6 h-6 flex-shrink-0"><Euro /></span>
+                    <span className="sidebar-link-text">Admin Panel</span>
+                </button>
+            )}
           </nav>
           <div className="pb-4">
             <button
@@ -168,6 +219,10 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
         className={`sidebar-overlay lg:hidden ${isOpen ? 'active' : ''}`}
         onClick={onClose}
       />
+      <AdminDiscountPanel 
+        isVisible={showAdminPanel} 
+        onClose={() => setShowAdminPanel(false)} 
+      />
     </>
     );
   }
@@ -175,7 +230,13 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
 
   // If user is a regular user
   const regularUserLinks = [
+    { page: Page.UserProfile, userId: user._id.toString(), icon: <UserIcon />, text: t('my_profile') },
+    { page: Page.Search, icon: <MagnifyingGlassIcon />, text: 'Zaawansowane Wyszukiwanie' },
+    { page: Page.Payment, icon: <CreditCardIcon />, text: '💳 System Płatności' },
+    { page: Page.Geolocation, icon: <MapIcon />, text: '📍 Enhanced Geolocation' },
     { page: Page.Saved, icon: <BookmarkIcon />, text: t('saved') },
+    { page: Page.OpenStreetMapDemo, icon: <MapIcon />, text: '🗺️ OpenStreetMap Demo' },
+    { page: Page.AdvancedFeaturesDemo, icon: <SparklesIcon />, text: '🚀 Advanced Features' },
     { page: Page.Support, icon: <LifebuoyIcon />, text: t('support') },
   ];
 
@@ -194,8 +255,18 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
           </div>
           <nav className="flex-grow flex flex-col gap-2">
             {regularUserLinks.map((link) => (
-              <SidebarLink key={link.page} {...link} isExpanded={isExpanded} />
+              <SidebarLink key={`${link.page}-${link.userId || ''}`} {...link} isExpanded={isExpanded} />
             ))}
+            {isAdmin && (
+                <button
+                    onClick={() => setShowAdminPanel(true)}
+                    className="sidebar-link"
+                    title={isExpanded ? '' : 'Admin Panel'}
+                >
+                    <span className="w-6 h-6 flex-shrink-0"><Euro /></span>
+                    <span className="sidebar-link-text">Admin Panel</span>
+                </button>
+            )}
           </nav>
           <div className="pb-4">
             <button
@@ -212,6 +283,10 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
       <div
         className={`sidebar-overlay lg:hidden ${isOpen ? 'active' : ''}`}
         onClick={onClose}
+      />
+      <AdminDiscountPanel 
+        isVisible={showAdminPanel} 
+        onClose={() => setShowAdminPanel(false)} 
       />
     </>
   );

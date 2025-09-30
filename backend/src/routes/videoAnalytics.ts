@@ -1,6 +1,9 @@
 import express, { Request, Response } from 'express';
 import Video, { IVideo } from '../models/Video';
 import { authenticateToken } from '../middleware/auth';
+import { VideoAnalyticsService } from '../services/videoAnalyticsService';
+import { VideoRecommendationService } from '../services/videoRecommendationService';
+import { logger } from '../utils/logger';
 
 const router = express.Router();
 
@@ -162,6 +165,258 @@ router.get('/trending', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Error fetching trending videos:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// 🚀 ENHANCED VIDEO ANALYTICS ENDPOINTS
+
+/**
+ * POST /api/video-analytics/enhanced/record
+ * Rejestruje zaawansowane wydarzenia związane z oglądaniem wideo
+ */
+router.post('/enhanced/record', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      videoId,
+      businessId,
+      event,
+      watchTime,
+      totalDuration,
+      currentTime,
+      quality,
+      playbackRate,
+      dropOffPoint
+    } = req.body;
+
+    const userId = req.user?.id || 'anonymous';
+
+    // Record enhanced analytics event
+    await VideoAnalyticsService.recordVideoEvent({
+      videoId,
+      userId,
+      businessId,
+      watchTime: watchTime || 0,
+      totalDuration: totalDuration || 0,
+      dropOffPoints: dropOffPoint ? [dropOffPoint] : [],
+      deviceInfo: {
+        type: req.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop',
+        browser: 'unknown',
+        os: 'unknown'
+      },
+      quality: quality || 'auto',
+      playbackSpeed: playbackRate || 1,
+      interactions: { likes: 0, shares: 0, comments: 0, saves: 0 }
+    });
+
+    // Update user profile for recommendations
+    if (event === 'watch' || event === 'complete') {
+      await VideoRecommendationService.updateUserProfile(userId, {
+        videoId,
+        category: req.body.category || 'general',
+        watchTime: watchTime || 0,
+        duration: totalDuration || 0,
+        action: event === 'complete' ? 'complete' : 'watch'
+      });
+    }
+
+    logger.info(`Enhanced video analytics recorded: ${event} for video ${videoId} by user ${userId}`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Enhanced analytics recorded successfully'
+    });
+
+  } catch (error) {
+    logger.error('Error recording enhanced video analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record enhanced analytics'
+    });
+  }
+});
+
+/**
+ * POST /api/video-analytics/enhanced/interaction
+ * Rejestruje interakcje użytkownika (like, share, save)
+ */
+router.post('/enhanced/interaction', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { videoId, businessId, action, category } = req.body;
+    const userId = req.user?.id || 'anonymous';
+
+    // Update user profile
+    await VideoRecommendationService.updateUserProfile(userId, {
+      videoId,
+      category: category || 'general',
+      watchTime: 0,
+      duration: 0,
+      action: action as 'like' | 'share'
+    });
+
+    logger.info(`Video interaction recorded: ${action} for video ${videoId} by user ${userId}`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Interaction recorded successfully'
+    });
+
+  } catch (error) {
+    logger.error('Error recording video interaction:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record interaction'
+    });
+  }
+});
+
+/**
+ * GET /api/video-analytics/enhanced/metrics/:videoId
+ * Pobiera zaawansowane metryki dla konkretnego wideo
+ */
+router.get('/enhanced/metrics/:videoId', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { videoId } = req.params;
+    const metrics = await VideoAnalyticsService.getVideoMetrics(videoId);
+
+    if (!metrics) {
+      res.status(404).json({
+        success: false,
+        message: 'No enhanced metrics found for this video'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: metrics
+    });
+
+  } catch (error) {
+    logger.error('Error getting enhanced video metrics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get enhanced video metrics'
+    });
+  }
+});
+
+/**
+ * GET /api/video-analytics/enhanced/recommendations
+ * Pobiera AI-powered rekomendacje wideo dla użytkownika
+ */
+router.get('/enhanced/recommendations', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id || 'anonymous';
+    const limit = parseInt(req.query.limit as string) || 10;
+    const excludeWatched = req.query.excludeWatched !== 'false';
+
+    const recommendations = await VideoRecommendationService.getRecommendationsForUser(
+      userId,
+      limit,
+      excludeWatched
+    );
+
+    res.status(200).json({
+      success: true,
+      data: recommendations
+    });
+
+  } catch (error) {
+    logger.error('Error getting AI video recommendations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get AI recommendations'
+    });
+  }
+});
+
+/**
+ * GET /api/video-analytics/enhanced/similar/:videoId
+ * Pobiera podobne wideo używając AI
+ */
+router.get('/enhanced/similar/:videoId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { videoId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    const similarVideos = await VideoRecommendationService.getSimilarVideos(videoId, limit);
+
+    res.status(200).json({
+      success: true,
+      data: similarVideos
+    });
+
+  } catch (error) {
+    logger.error('Error getting similar videos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get similar videos'
+    });
+  }
+});
+
+/**
+ * GET /api/video-analytics/enhanced/trending
+ * Pobiera AI-powered trending videos
+ */
+router.get('/enhanced/trending', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const trendingVideos = await VideoRecommendationService.getTrendingVideos(limit);
+
+    res.status(200).json({
+      success: true,
+      data: trendingVideos
+    });
+
+  } catch (error) {
+    logger.error('Error getting AI trending videos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get AI trending videos'
+    });
+  }
+});
+
+/**
+ * POST /api/video-analytics/enhanced/register-video
+ * Rejestruje nowe wideo w AI recommendation system
+ */
+router.post('/enhanced/register-video', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      id,
+      title,
+      businessName,
+      category,
+      thumbnailUrl,
+      duration,
+      rating
+    } = req.body;
+
+    VideoRecommendationService.addVideoToDatabase({
+      id,
+      title,
+      businessName,
+      category,
+      thumbnailUrl,
+      duration,
+      rating
+    });
+
+    logger.info(`Video registered in AI recommendation system: ${id}`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Video registered in AI system successfully'
+    });
+
+  } catch (error) {
+    logger.error('Error registering video in AI system:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to register video in AI system'
+    });
   }
 });
 

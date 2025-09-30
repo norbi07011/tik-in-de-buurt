@@ -44,7 +44,7 @@ class StripeServiceClass {
    */
   async getPlans(): Promise<SubscriptionPlan[]> {
     try {
-      const response = await fetch('/api/payments/plans');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/payments/plans`);
       const result = await response.json();
       
       if (!result.success) {
@@ -61,16 +61,20 @@ class StripeServiceClass {
   /**
    * Create payment intent for one-time payment
    */
-  async createPaymentIntent(planId: string, businessId: string): Promise<PaymentIntentResponse> {
+  async createPaymentIntent(planId: string, businessId: string, customAmount?: number): Promise<PaymentIntentResponse> {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/payments/create-payment-intent', {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/payments/create-payment-intent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ planId, businessId })
+        body: JSON.stringify({ 
+          planId, 
+          businessId,
+          amount: customAmount
+        })
       });
 
       const result = await response.json();
@@ -89,8 +93,8 @@ class StripeServiceClass {
    */
   async createSubscription(planId: string, businessId: string): Promise<SubscriptionResponse> {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/payments/create-subscription', {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/payments/create-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

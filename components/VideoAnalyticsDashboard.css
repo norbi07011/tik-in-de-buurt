@@ -1,0 +1,126 @@
+/* VideoAnalyticsDashboard CSS */
+
+/* Retention curve bars with dynamic heights */
+.retention-bar-0 { height: 0%; }
+.retention-bar-1 { height: 10%; }
+.retention-bar-2 { height: 20%; }
+.retention-bar-3 { height: 30%; }
+.retention-bar-4 { height: 40%; }
+.retention-bar-5 { height: 50%; }
+.retention-bar-6 { height: 60%; }
+.retention-bar-7 { height: 70%; }
+.retention-bar-8 { height: 80%; }
+.retention-bar-9 { height: 90%; }
+.retention-bar-10 { height: 100%; }
+
+/* Progress bars with dynamic widths */
+.progress-0 { width: 0%; }
+.progress-1 { width: 10%; }
+.progress-2 { width: 20%; }
+.progress-3 { width: 30%; }
+.progress-4 { width: 40%; }
+.progress-5 { width: 50%; }
+.progress-6 { width: 60%; }
+.progress-7 { width: 70%; }
+.progress-8 { width: 80%; }
+.progress-9 { width: 90%; }
+.progress-10 { width: 100%; }
+
+/* Animation for chart elements */
+.retention-bar-0,
+.retention-bar-1,
+.retention-bar-2,
+.retention-bar-3,
+.retention-bar-4,
+.retention-bar-5,
+.retention-bar-6,
+.retention-bar-7,
+.retention-bar-8,
+.retention-bar-9,
+.retention-bar-10 {
+  animation: growUp 0.8s ease-out;
+  transform-origin: bottom;
+}
+
+.progress-0,
+.progress-1,
+.progress-2,
+.progress-3,
+.progress-4,
+.progress-5,
+.progress-6,
+.progress-7,
+.progress-8,
+.progress-9,
+.progress-10 {
+  animation: growRight 0.6s ease-out;
+  transform-origin: left;
+}
+
+@keyframes growUp {
+  from {
+    height: 0%;
+  }
+  to {
+    height: var(--final-height, 100%);
+  }
+}
+
+@keyframes growRight {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--final-width, 100%);
+  }
+}
+
+/* Hover effects */
+.retention-bar-0:hover,
+.retention-bar-1:hover,
+.retention-bar-2:hover,
+.retention-bar-3:hover,
+.retention-bar-4:hover,
+.retention-bar-5:hover,
+.retention-bar-6:hover,
+.retention-bar-7:hover,
+.retention-bar-8:hover,
+.retention-bar-9:hover,
+.retention-bar-10:hover {
+  transform: scaleY(1.05);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .retention-bar-0,
+  .retention-bar-1,
+  .retention-bar-2,
+  .retention-bar-3,
+  .retention-bar-4,
+  .retention-bar-5,
+  .retention-bar-6,
+  .retention-bar-7,
+  .retention-bar-8,
+  .retention-bar-9,
+  .retention-bar-10 {
+    min-width: 2px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .retention-bar-0:hover,
+  .retention-bar-1:hover,
+  .retention-bar-2:hover,
+  .retention-bar-3:hover,
+  .retention-bar-4:hover,
+  .retention-bar-5:hover,
+  .retention-bar-6:hover,
+  .retention-bar-7:hover,
+  .retention-bar-8:hover,
+  .retention-bar-9:hover,
+  .retention-bar-10:hover {
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  }
+}

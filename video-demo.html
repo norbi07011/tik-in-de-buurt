@@ -81,7 +81,11 @@
 
         .feature-list {
             list-style: none;
-            space-y: 8px;
+            gap: 8px;
+        }
+        
+        .demo-section {
+            margin: 20px 0;
         }
 
         .feature-list li {
@@ -255,16 +259,16 @@
             <h2>🚀 Live Demo Ready!</h2>
             <p>Both frontend and backend servers are running successfully</p>
             
-            <div style="margin: 20px 0;">
+            <div class="demo-section">
                 <p><span class="status-indicator status-online"></span>Frontend: <strong>http://localhost:3000</strong></p>
                 <p><span class="status-indicator status-online"></span>Backend: <strong>http://localhost:8080</strong></p>
             </div>
 
             <div class="demo-buttons">
-                <a href="http://localhost:3000" class="demo-btn primary" target="_blank">
+                <a href="http://localhost:3000" class="demo-btn primary" target="_blank" rel="noopener">
                     🌐 Open Frontend App
                 </a>
-                <a href="http://localhost:8080/health" class="demo-btn secondary" target="_blank">
+                <a href="http://localhost:8080/health" class="demo-btn secondary" target="_blank" rel="noopener">
                     ⚡ Check Backend Health
                 </a>
             </div>

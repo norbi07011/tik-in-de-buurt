@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from root directory
-const envPath = path.resolve(process.cwd(), '../.env');
+// Load environment variables from backend directory
+const envPath = path.resolve(__dirname, '../../.env');
 console.log('🔍 Loading .env from:', envPath);
 dotenv.config({ path: envPath });
 
 // Environment validation
 const requiredEnvVars = {
-  PORT: process.env.PORT || '8080',
+  PORT: parseInt(process.env.PORT || '8080'),
   BIND_HOST: process.env.BIND_HOST || '0.0.0.0',
   NODE_ENV: process.env.NODE_ENV || 'development',
   DATABASE_URL: process.env.DATABASE_URL || 'mongodb://localhost:27017/tik-in-de-buurt',

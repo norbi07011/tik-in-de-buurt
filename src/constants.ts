@@ -120,28 +120,26 @@ export const JOB_CATEGORIES: JobCategory[] = [
 
 export const MOCK_PLANS: Plan[] = [
     {
-        id: 'plan_monthly',
-        nameKey: 'plan_monthly_title',
-        price: 15.99,
-        intervalKey: 'month',
-        features: ['feature_unlimited_ads', 'feature_video_support']
-    },
-    {
-        id: 'plan_yearly',
-        nameKey: 'plan_yearly_title',
-        price: 149.99,
-        originalPrice: 191.88,
+        id: 'basic',
+        nameKey: 'plan_basic_title',
+        price: 49.99,
         intervalKey: 'year',
-        priceNoteKey: 'plan_yearly_promo_subtitle',
-        isPopular: true,
-        features: ['feature_unlimited_ads', 'feature_video_support', 'feature_top_placement', 'feature_verified_badge']
+        features: ['Business Profile', 'Up to 10 Photos', 'Basic Analytics', 'Customer Reviews', 'Contact Information']
     },
     {
-        id: 'plan_two_year',
-        nameKey: 'plan_two_year_title',
-        price: 249.99,
-        intervalKey: '2_years',
-        features: ['feature_unlimited_ads', 'feature_video_support', 'feature_top_placement', 'feature_verified_badge', 'feature_premium_support']
+        id: 'pro',
+        nameKey: 'plan_pro_title',
+        price: 99.99,
+        intervalKey: 'year',
+        isPopular: true,
+        features: ['Everything in Basic', 'Unlimited Photos', 'Video Upload (up to 10)', 'Advanced Analytics', 'Priority Support', 'Social Media Integration', 'Custom Business Hours', 'Multiple Locations']
+    },
+    {
+        id: 'enterprise',
+        nameKey: 'plan_enterprise_title',
+        price: 199.99,
+        intervalKey: 'year',
+        features: ['Everything in Pro', 'Unlimited Video Upload', 'API Access', 'White-label Solutions', 'Dedicated Account Manager', 'Custom Integrations', 'Advanced Security', 'Priority Listing']
     }
 ];
 

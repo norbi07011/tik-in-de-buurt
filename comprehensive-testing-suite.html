@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tik-in-de-buurt API Testing Suite</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .test-section { border: 1px solid #ddd; margin: 20px 0; padding: 20px; border-radius: 8px; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        input, textarea, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background-color: #0056b3; }
+        .json-display { background-color: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow: auto; }
+        .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Tik-in-de-buurt - Complete Functionality Testing Suite</h1>
+    <p><strong>Frontend:</strong> <span id="frontendUrl">http://localhost:5177</span> | <strong>Backend:</strong> <span id="backendUrl">http://localhost:8080</span></p>
+
+    <!-- Test 1: Backend Health Check -->
+    <div class="test-section">
+        <h3>🔍 Test 1: Backend Health Check</h3>
+        <button onclick="testBackendHealth()">Check Backend Health</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <!-- Test 2: Existing Account Login -->
+    <div class="test-section">
+        <h3>🔐 Test 2: Login with Existing Accounts</h3>
+        <div class="form-group">
+            <div>
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="jan@business.com" placeholder="Email">
+            </div>
+            <div>
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="test123456" placeholder="Password">
+            </div>
+        </div>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testLogin('test@example.com', 'password123')">Test User Account</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <!-- Test 3: User Registration -->
+    <div class="test-section">
+        <h3>✍️ Test 3: New User Registration</h3>
+        <div class="form-group">
+            <div>
+                <label>Full Name:</label>
+                <input type="text" id="regName" value="Test User Systematic 2025" placeholder="Full Name">
+            </div>
+            <div>
+                <label>Email:</label>
+                <input type="email" id="regEmail" value="test-systematic@example.com" placeholder="Email">
+            </div>
+        </div>
+        <div style="margin: 10px 0;">
+            <label>Password:</label>
+            <input type="password" id="regPassword" value="testpass123" placeholder="Password">
+        </div>
+        <button onclick="testUserRegistration()">Register New User</button>
+        <div id="regResult" class="result"></div>
+    </div>
+
+    <!-- Test 4: Business Registration -->
+    <div class="test-section">
+        <h3>🏢 Test 4: Business User Registration</h3>
+        <div class="form-group">
+            <div>
+                <label>Owner Name:</label>
+                <input type="text" id="bizOwnerName" value="Business Owner Test" placeholder="Owner Name">
+            </div>
+            <div>
+                <label>Owner Email:</label>
+                <input type="email" id="bizOwnerEmail" value="business-test@example.com" placeholder="Owner Email">
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <label>Password:</label>
+                <input type="password" id="bizPassword" value="bizpass123" placeholder="Password">
+            </div>
+            <div>
+                <label>Business Name:</label>
+                <input type="text" id="bizName" value="Test Business Systematic 2025" placeholder="Business Name">
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <label>Category:</label>
+                <select id="bizCategory">
+                    <option value="technology">Technology</option>
+                    <option value="salon_pieknosci">Salon Piękności</option>
+                    <option value="restaurants">Restaurant</option>
+                    <option value="retail">Retail</option>
+                </select>
+            </div>
+            <div>
+                <label>Phone:</label>
+                <input type="text" id="bizPhone" value="+31 123 456 789" placeholder="Phone">
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <label>Street Address:</label>
+                <input type="text" id="bizStreet" value="Test Street 123" placeholder="Street Address">
+            </div>
+            <div>
+                <label>Postal Code:</label>
+                <input type="text" id="bizPostal" value="1234AB" placeholder="Postal Code">
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <label>City:</label>
+                <input type="text" id="bizCity" value="Amsterdam" placeholder="City">
+            </div>
+            <div>
+                <label>KVK Number:</label>
+                <input type="text" id="bizKvk" value="87654321" placeholder="KVK Number">
+            </div>
+        </div>
+        <button onclick="testBusinessRegistration()">Register Business</button>
+        <div id="bizRegResult" class="result"></div>
+    </div>
+
+    <!-- Test 5: Business Data Fetch -->
+    <div class="test-section">
+        <h3>📊 Test 5: Business Data Operations</h3>
+        <div>
+            <label>Business ID:</label>
+            <input type="text" id="businessId" placeholder="Business ID (will be filled after login)" readonly>
+        </div>
+        <button onclick="fetchBusinessData()">Fetch Business Data</button>
+        <div id="businessDataResult" class="result"></div>
+    </div>
+
+    <!-- Test 6: Profile Management -->
+    <div class="test-section">
+        <h3>👤 Test 6: User Profile Management</h3>
+        <button onclick="testUserProfile()">Get Current User Profile</button>
+        <div id="profileResult" class="result"></div>
+    </div>
+
+    <!-- Test Results Summary -->
+    <div class="test-section">
+        <h3>📝 Test Results Summary</h3>
+        <div id="testSummary" class="result info">
+            <p>Test results will appear here as you run the tests above.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let authToken = null;
+        let currentUser = null;
+        let testResults = [];
+
+        function updateSummary(testName, status, details) {
+            testResults.push({ testName, status, details, timestamp: new Date().toLocaleTimeString() });
+            const summary = document.getElementById('testSummary');
+            summary.innerHTML = testResults.map(result => 
+                `<div><strong>${result.timestamp} - ${result.testName}:</strong> 
+                <span style="color: ${result.status === 'PASS' ? 'green' : 'red'}">${result.status}</span> 
+                - ${result.details}</div>`
+            ).join('');
+        }
+
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            try {
+                const response = await fetch(`${API_BASE}/../health`);
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `<strong>✅ Backend Health Check PASSED</strong><br>
+                    <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                updateSummary('Backend Health Check', 'PASS', 'Backend is responding correctly');
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Backend Health Check FAILED</strong><br>Error: ${error.message}`;
+                updateSummary('Backend Health Check', 'FAIL', error.message);
+            }
+        }
+
+        async function testLogin(email = null, password = null) {
+            const resultDiv = document.getElementById('loginResult');
+            const loginEmail = email || document.getElementById('loginEmail').value;
+            const loginPassword = password || document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail, password: loginPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    if (data.user.businessId) {
+                        document.getElementById('businessId').value = data.user.businessId;
+                    }
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ Login SUCCESSFUL</strong><br>
+                        <strong>User:</strong> ${data.user.name} (${data.user.email})<br>
+                        <strong>Type:</strong> ${data.user.businessId ? 'Business User' : 'Regular User'}<br>
+                        <strong>Token:</strong> ${data.token.substring(0, 50)}...<br>
+                        <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                    updateSummary('Login Test', 'PASS', `Successfully logged in as ${data.user.name}`);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ Login FAILED</strong><br>Error: ${data.error || data.message}`;
+                    updateSummary('Login Test', 'FAIL', data.error || data.message);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Login ERROR</strong><br>Error: ${error.message}`;
+                updateSummary('Login Test', 'FAIL', error.message);
+            }
+        }
+
+        async function testUserRegistration() {
+            const resultDiv = document.getElementById('regResult');
+            const regData = {
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(regData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ User Registration SUCCESSFUL</strong><br>
+                        <strong>New User:</strong> ${data.user.name} (${data.user.email})<br>
+                        <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                    updateSummary('User Registration', 'PASS', `User ${data.user.name} registered successfully`);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ User Registration FAILED</strong><br>Error: ${data.error || data.message}`;
+                    updateSummary('User Registration', 'FAIL', data.error || data.message);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ User Registration ERROR</strong><br>Error: ${error.message}`;
+                updateSummary('User Registration', 'FAIL', error.message);
+            }
+        }
+
+        async function testBusinessRegistration() {
+            const resultDiv = document.getElementById('bizRegResult');
+            const bizData = {
+                name: document.getElementById('bizOwnerName').value,
+                email: document.getElementById('bizOwnerEmail').value,
+                password: document.getElementById('bizPassword').value,
+                businessName: document.getElementById('bizName').value,
+                businessDescription: 'Systematic test business for application testing',
+                category: document.getElementById('bizCategory').value,
+                phone: document.getElementById('bizPhone').value,
+                website: '',
+                street: document.getElementById('bizStreet').value,
+                postalCode: document.getElementById('bizPostal').value,
+                city: document.getElementById('bizCity').value,
+                kvkNumber: document.getElementById('bizKvk').value,
+                btwNumber: 'NL' + document.getElementById('bizKvk').value + 'B01',
+                iban: 'NL91ABNA0417164300'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register/business`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bizData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    document.getElementById('businessId').value = data.user.businessId;
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ Business Registration SUCCESSFUL</strong><br>
+                        <strong>Business Owner:</strong> ${data.user.name} (${data.user.email})<br>
+                        <strong>Business:</strong> ${data.business.name}<br>
+                        <strong>Business ID:</strong> ${data.user.businessId}<br>
+                        <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                    updateSummary('Business Registration', 'PASS', `Business ${data.business.name} registered successfully`);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ Business Registration FAILED</strong><br>Error: ${data.error || data.message}`;
+                    updateSummary('Business Registration', 'FAIL', data.error || data.message);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Business Registration ERROR</strong><br>Error: ${error.message}`;
+                updateSummary('Business Registration', 'FAIL', error.message);
+            }
+        }
+
+        async function fetchBusinessData() {
+            const resultDiv = document.getElementById('businessDataResult');
+            const businessId = document.getElementById('businessId').value;
+            
+            if (!businessId) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>❌ No Business ID provided</strong><br>Please login as business user first.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/businesses/${businessId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ Business Data Fetch SUCCESSFUL</strong><br>
+                        <strong>Business:</strong> ${data.business.name}<br>
+                        <strong>Category:</strong> ${data.business.category}<br>
+                        <strong>Location:</strong> ${data.business.address.city}<br>
+                        <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                    updateSummary('Business Data Fetch', 'PASS', `Retrieved data for ${data.business.name}`);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ Business Data Fetch FAILED</strong><br>Error: ${data.error || data.message}`;
+                    updateSummary('Business Data Fetch', 'FAIL', data.error || data.message);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Business Data Fetch ERROR</strong><br>Error: ${error.message}`;
+                updateSummary('Business Data Fetch', 'FAIL', error.message);
+            }
+        }
+
+        async function testUserProfile() {
+            const resultDiv = document.getElementById('profileResult');
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<strong>❌ No Authentication Token</strong><br>Please login first.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ User Profile Fetch SUCCESSFUL</strong><br>
+                        <strong>User:</strong> ${data.user.name}<br>
+                        <strong>Email:</strong> ${data.user.email}<br>
+                        <strong>Verified:</strong> ${data.user.isVerified ? 'Yes' : 'No'}<br>
+                        <div class="json-display">${JSON.stringify(data, null, 2)}</div>`;
+                    updateSummary('User Profile Fetch', 'PASS', `Retrieved profile for ${data.user.name}`);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ User Profile Fetch FAILED</strong><br>Error: ${data.error || data.message}`;
+                    updateSummary('User Profile Fetch', 'FAIL', data.error || data.message);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ User Profile Fetch ERROR</strong><br>Error: ${error.message}`;
+                updateSummary('User Profile Fetch', 'FAIL', error.message);
+            }
+        }
+
+        // Initialize testing
+        window.onload = function() {
+            updateSummary('Testing Suite', 'READY', 'Test suite loaded and ready for testing');
+        };
+    </script>
+</body>
+</html>

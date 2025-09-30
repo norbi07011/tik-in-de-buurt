@@ -7,10 +7,13 @@ import { ChevronDownIcon, GlobeAltIcon, InstagramIcon, FacebookIcon, TwitterIcon
 import { api } from '../src/api';
 import { useStore } from '../src/store';
 import { useDataFetcher } from '../hooks/useDataFetcher';
+import StreetViewButton from '../components/maps/StreetViewButton';
+import { useBusinessLocation } from '../src/hooks/useBusinessLocation';
 
 const UiverseBusinessCard: React.FC<{ business: Business }> = ({ business }) => {
     const { t } = useTranslation();
     const navigate = useStore(state => state.navigate);
+    const { coordinates, isStreetViewAvailable } = useBusinessLocation(business.address, t(business.nameKey));
 
     const socials = [];
     if (business.website) socials.push({ type: 'website' as const, url: business.website });
@@ -42,7 +45,7 @@ const UiverseBusinessCard: React.FC<{ business: Business }> = ({ business }) => 
             </div>
             <div className="bottom">
               <div className="social-buttons-container">
-                {socials.slice(0, 3).map((social) => (
+                {socials.slice(0, 2).map((social) => (
                   <a
                     key={social.type}
                     href={social.url}
@@ -58,6 +61,21 @@ const UiverseBusinessCard: React.FC<{ business: Business }> = ({ business }) => 
                      {social.type === 'twitter' && <TwitterIcon className="svg" />}
                   </a>
                 ))}
+                
+                {/* Street View Button */}
+                {isStreetViewAvailable && coordinates && (
+                  <div className="social-button" onClick={(e) => e.stopPropagation()}>
+                    <StreetViewButton
+                      position={coordinates}
+                      businessName={t(business.nameKey)}
+                      address={`${business.address.street}, ${business.address.city}`}
+                      size="sm"
+                      variant="outline"
+                      showLabel={false}
+                      className="!p-2 !border-none hover:!bg-transparent"
+                    />
+                  </div>
+                )}
               </div>
               <div className="view-more">
                 <button className="view-more-button" onClick={handleViewMore}>

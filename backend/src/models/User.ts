@@ -50,6 +50,8 @@ export interface IUser extends Document {
   lastLogin?: Date;
   emailVerifiedAt?: Date;
   passwordResetAt?: Date;
+  resetToken?: string;
+  resetTokenExpires?: Date;
   isPhoneVerified?: boolean;
   phoneVerifiedAt?: Date;
   createdAt: Date;
@@ -248,6 +250,14 @@ const userSchema = new Schema<IUser>({
   },
   passwordResetAt: {
     type: Date
+  },
+  resetToken: {
+    type: String,
+    select: false
+  },
+  resetTokenExpires: {
+    type: Date,
+    select: false
   },
   isPhoneVerified: {
     type: Boolean,

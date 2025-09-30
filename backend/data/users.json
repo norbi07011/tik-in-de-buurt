@@ -1,0 +1,13 @@
+[
+  {
+    "name": "testuser2",
+    "email": "test2@example.com",
+    "password": "$2b$12$oFhQj9VDgIrHdwD3I9pUV.5qsIeiCOP3qXSoyVNs.p7QAkUEeepk.",
+    "userType": "user",
+    "isVerified": false,
+    "isActive": true,
+    "createdAt": "2025-09-29T02:20:35.457Z",
+    "_id": "7erc29kv3bm",
+    "updatedAt": "2025-09-29T02:20:35.457Z"
+  }
+]

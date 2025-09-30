@@ -1,0 +1,178 @@
+/* 🗺️ OpenStreetMap Styles */
+
+/* Container Styles */
+.openstreetmap-container {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.maps-integration {
+  width: 100%;
+}
+
+/* Loading and Error States */
+.map-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.map-error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fef2f2;
+  border-radius: 0.5rem;
+}
+
+/* Map Height Classes */
+.map-height-400 { height: 400px; }
+.map-height-500 { height: 500px; }
+.map-height-600 { height: 600px; }
+.map-height-700 { height: 700px; }
+
+/* Custom Marker Styles */
+.custom-business-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.user-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Popup Styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.leaflet-popup-content {
+  margin: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.business-popup {
+  max-width: 300px;
+}
+
+.business-popup .font-semibold {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.business-popup .space-y-2 > * + * {
+  margin-top: 8px;
+}
+
+/* Leaflet Control Styles */
+.leaflet-container {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.leaflet-control-zoom a {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+/* Animation for user location marker */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Business category colors */
+.category-restaurants { background-color: #10b981; }
+.category-cafes { background-color: #f59e0b; }
+.category-shops { background-color: #8b5cf6; }
+.category-services { background-color: #3b82f6; }
+.category-healthcare { background-color: #ef4444; }
+.category-entertainment { background-color: #ec4899; }
+
+/* Status indicators */
+.status-open { 
+  background-color: #dcfce7; 
+  color: #166534; 
+}
+
+.status-closed { 
+  background-color: #fee2e2; 
+  color: #991b1b; 
+}
+
+/* Map overlay styles */
+.map-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-width: 24rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .openstreetmap-container {
+    border-radius: 0.25rem;
+  }
+  
+  .map-overlay {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-top: 1rem;
+    max-width: 100%;
+  }
+  
+  .business-popup {
+    max-width: 250px;
+  }
+  
+  .leaflet-popup-content {
+    margin: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-popup {
+    max-width: 200px;
+  }
+  
+  .leaflet-popup-content {
+    margin: 8px;
+    font-size: 0.875rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .openstreetmap-container {
+    break-inside: avoid;
+  }
+  
+  .leaflet-control-container {
+    display: none;
+  }
+}

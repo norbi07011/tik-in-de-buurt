@@ -4,8 +4,8 @@ import i18n from 'i18next';
 import { useStore } from './store';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false'; // Default to true for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'; // Default to false for development
 
 // In-memory database for simulation
 let users: User[] = [
@@ -160,7 +160,7 @@ export const api = {
                 await networkDelay(2000);
                 
                 // Basic validation
-                if (!data.firstName || !data.lastName || !data.email || !data.password) {
+                if (!data.name || !data.email || !data.password) {
                     throw new Error('Wszystkie pola są wymagane');
                 }
                 
@@ -171,7 +171,7 @@ export const api = {
                 // Create mock user
                 const newUser: User = { 
                     id: nextUserId++, 
-                    name: `${data.firstName} ${data.lastName}`, 
+                    name: data.name, 
                     email: data.email 
                 };
                 users.push(newUser);
@@ -219,30 +219,32 @@ export const api = {
                     business: newBusiness
                 };
             } else {
-                const response = await fetch(`${API_BASE_URL}/api/auth/register/business`, {
+                const response = await fetch(`${API_BASE_URL}/auth/register/business`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        firstName: data.firstName,
-                        lastName: data.lastName,
+                        name: data.name,
                         email: data.email,
                         password: data.password,
                         businessName: data.businessName,
-                        description: data.description,
+                        businessDescription: data.businessDescription,
                         category: data.category,
                         phone: data.phone,
                         website: data.website,
-                        address: data.address,
-                        legalInfo: data.legalInfo,
-                        socialMedia: {
-                            instagram: data.instagram,
-                            facebook: data.facebook,
-                            twitter: data.twitter,
-                            linkedin: data.linkedin,
-                            tiktok: data.tiktokUrl
-                        }
+                        street: data.street,
+                        postalCode: data.postalCode,
+                        city: data.city,
+                        kvkNumber: data.kvkNumber,
+                        btwNumber: data.btwNumber,
+                        iban: data.iban,
+                        instagram: data.instagram,
+                        facebook: data.facebook,
+                        twitter: data.twitter,
+                        linkedin: data.linkedin,
+                        tiktokUrl: data.tiktokUrl,
+                        otherLinkUrl: data.otherLinkUrl
                     }),
                 });
 
@@ -262,6 +264,62 @@ export const api = {
                     token: result.token,
                     business: result.business
                 };
+            }
+        }),
+
+    forgotPassword: async (email: string): Promise<{ message: string }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(1000);
+                // Mock validation
+                if (!email) {
+                    throw new Error('Email is required');
+                }
+                return { message: 'If an account with that email exists, we have sent a password reset link.' };
+            } else {
+                const response = await apiCall('/auth/forgot-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ email }),
+                });
+                return response;
+            }
+        }),
+
+    resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(1000);
+                // Mock validation
+                if (!token || !newPassword) {
+                    throw new Error('Token and new password are required');
+                }
+                if (newPassword.length < 6) {
+                    throw new Error('Password must be at least 6 characters long');
+                }
+                return { message: 'Password has been reset successfully. You can now log in with your new password.' };
+            } else {
+                const response = await apiCall('/auth/reset-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ token, newPassword }),
+                });
+                return response;
+            }
+        }),
+
+    verifyResetToken: async (token: string): Promise<{ message: string, email?: string }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(500);
+                // Mock validation
+                if (!token) {
+                    throw new Error('Invalid or expired reset token');
+                }
+                return { message: 'Reset token is valid', email: 'user@example.com' };
+            } else {
+                const response = await apiCall(`/auth/verify-reset-token/${token}`, {
+                    method: 'GET',
+                });
+                return response;
             }
         }),
 
@@ -396,12 +454,31 @@ export const api = {
             return filteredBusinesses;
         }),
 
-    fetchBusinessById: async (id: number): Promise<Business> => {
-        await networkDelay(800);
-        const business = businesses.find(b => b.id === id);
-        if (!business) throw new Error("Business not found.");
-        return business;
-    },
+    fetchBusinessById: async (id: string): Promise<Business> => 
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(800);
+                const business = businesses.find(b => b.id === parseInt(id));
+                if (!business) throw new Error("Business not found.");
+                return business;
+            } else {
+                const response = await fetch(`${API_BASE_URL}/businesses/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch business');
+                }
+
+                const result = await response.json();
+                return result.business;
+            }
+        }),
     
     fetchBusinessByOwnerId: async (ownerId: number): Promise<Business> => 
         withFetching(async () => {
@@ -763,7 +840,7 @@ export const api = {
             return { success: true };
         }),
         
-    fetchBusinessProfileData: async (id: number): Promise<{
+    fetchBusinessProfileData: async (id: string): Promise<{
         business: Business;
         reviews: Review[];
         gallery: string[];
@@ -774,10 +851,10 @@ export const api = {
 
             // Directly call internal implementations to avoid nested withFetching calls
             const business = await api.fetchBusinessById(id);
-            const reviews = await api.fetchReviewsForBusiness(id);
-            const gallery = await api.fetchGalleryForBusiness(id);
-            const ads = await api.fetchAdsByBusinessId(id);
-            const posts = await api.fetchPosts({ businessId: id });
+            const reviews = await api.fetchReviewsForBusiness(parseInt(id));
+            const gallery = await api.fetchGalleryForBusiness(parseInt(id));
+            const ads = await api.fetchAdsByBusinessId(parseInt(id));
+            const posts = await api.fetchPosts({ businessId: parseInt(id) });
 
             return { business, reviews, gallery, ads, posts };
         }),
@@ -940,6 +1017,133 @@ export const api = {
                 }
                 
                 return response.json();
+            }
+        }),
+
+    // User Profile API Functions
+    fetchUserProfile: async (userId: string): Promise<any> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(500);
+                // Mock user profile data
+                const mockUser = {
+                    _id: userId,
+                    name: 'Jan Kowalski',
+                    email: 'jan@example.com',
+                    userType: 'user',
+                    avatar: 'https://picsum.photos/200/200?random=1',
+                    coverImage: 'https://picsum.photos/800/400?random=1',
+                    bio: 'Cześć! Jestem pasjonatem technologii i lubię dzielić się swoimi doświadczeniami.',
+                    location: 'Warszawa, Polska',
+                    website: 'https://jankowalski.pl',
+                    interests: ['Technologia', 'Fotografia', 'Podróże', 'Gotowanie'],
+                    languages: ['pl', 'en', 'de'],
+                    socialLinks: {
+                        facebook: 'https://facebook.com/jankowalski',
+                        instagram: 'https://instagram.com/jankowalski',
+                        twitter: 'https://twitter.com/jankowalski',
+                        linkedin: 'https://linkedin.com/in/jankowalski'
+                    },
+                    createdAt: new Date('2023-01-01'),
+                    isVerified: true,
+                    isActive: true
+                };
+                return mockUser;
+            } else {
+                return await apiCall(`/users/profile/${userId}`, {
+                    method: 'GET',
+                    headers: setAuthHeader(),
+                });
+            }
+        }),
+
+    fetchUserPosts: async (userId: string): Promise<any[]> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(300);
+                // Mock user posts
+                const mockPosts = [
+                    {
+                        id: 1,
+                        content: 'Właśnie wróciłem z niesamowitej wycieczki po Zakopanem! 🏔️',
+                        mediaUrl: 'https://picsum.photos/600/400?random=10',
+                        mediaType: 'photo',
+                        createdAt: new Date('2024-01-15'),
+                        likes: 24,
+                        comments: 8,
+                        shares: 3
+                    },
+                    {
+                        id: 2,
+                        content: 'Dzisiaj testowałem nowy aparat. Efekty są niesamowite! 📸',
+                        mediaUrl: 'https://picsum.photos/600/400?random=11',
+                        mediaType: 'photo',
+                        createdAt: new Date('2024-01-10'),
+                        likes: 18,
+                        comments: 5,
+                        shares: 2
+                    }
+                ];
+                return mockPosts;
+            } else {
+                return await apiCall(`/users/${userId}/posts`, {
+                    method: 'GET',
+                    headers: setAuthHeader(),
+                });
+            }
+        }),
+
+    fetchUserPhotos: async (userId: string): Promise<string[]> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(300);
+                // Mock user photos
+                const mockPhotos = Array.from({ length: 12 }, (_, i) => 
+                    `https://picsum.photos/400/400?random=${i + 20}`
+                );
+                return mockPhotos;
+            } else {
+                return await apiCall(`/users/${userId}/photos`, {
+                    method: 'GET',
+                    headers: setAuthHeader(),
+                });
+            }
+        }),
+
+    fetchUserVideos: async (userId: string): Promise<string[]> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(300);
+                // Mock user videos
+                const mockVideos = [
+                    'https://sample-videos.com/zip/10/mp4/480/mp4-sample-1.mp4',
+                    'https://sample-videos.com/zip/10/mp4/480/mp4-sample-2.mp4'
+                ];
+                return mockVideos;
+            } else {
+                return await apiCall(`/users/${userId}/videos`, {
+                    method: 'GET',
+                    headers: setAuthHeader(),
+                });
+            }
+        }),
+
+    updateUserProfile: async (userData: any): Promise<any> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(800);
+                // Mock profile update
+                return {
+                    success: true,
+                    message: 'Profil został zaktualizowany',
+                    user: userData
+                };
+            } else {
+                return await apiCall('/users/profile', {
+                    method: 'PUT',
+                    headers: setAuthHeader(),
+                    body: JSON.stringify(userData),
+                });
             }
         }),
 };

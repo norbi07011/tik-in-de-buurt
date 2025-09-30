@@ -124,7 +124,7 @@ const CommentsPanel: React.FC<{
             <div className="fixed bottom-0 left-0 right-0 z-40 h-[70vh] bg-[var(--background-alt)] rounded-t-2xl flex flex-col shadow-2xl animate-slide-up">
                 <header className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
                     <h2 className="font-bold text-lg text-[var(--text-primary)]">{t('comments')}</h2>
-                    <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                    <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]" aria-label="Close comments panel">
                         <XMarkIcon className="w-6 h-6" />
                     </button>
                 </header>
@@ -142,7 +142,7 @@ const CommentsPanel: React.FC<{
                             className="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-full py-2 px-4 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                             disabled={!user || isPosting}
                         />
-                        <button type="submit" disabled={!user || isPosting || !newComment.trim()} className="p-3 bg-[var(--primary)] text-[var(--primary-text)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                        <button type="submit" disabled={!user || isPosting || !newComment.trim()} className="p-3 bg-[var(--primary)] text-[var(--primary-text)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Submit comment">
                             <PaperAirplaneIcon className="w-5 h-5" />
                         </button>
                     </form>

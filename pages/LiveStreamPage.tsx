@@ -45,7 +45,7 @@ const LiveStreamPage: React.FC = () => {
         const fetchBusiness = async () => {
             if (user?.businessId) {
                 try {
-                    const businessData = await api.fetchBusinessById(user.businessId);
+                    const businessData = await api.fetchBusinessById(user.businessId.toString());
                     setBusiness(businessData);
                     setStreamTitle(`${t(businessData.nameKey)} Live Stream`);
                 } catch (error) {

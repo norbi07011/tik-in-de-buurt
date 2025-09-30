@@ -27,6 +27,7 @@ export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [messageCallbacks, setMessageCallbacks] = useState<((message: ChatMessageData) => void)[]>([]);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -137,6 +138,23 @@ export const useSocket = () => {
     }
   }, [socket]);
 
+  const sendChatMessage = useCallback((messageData: {
+    conversationId: string;
+    content: string;
+    type?: 'text' | 'image' | 'file';
+  }) => {
+    if (socket) {
+      socket.emit('send_message', messageData);
+    }
+  }, [socket]);
+
+  const onChatMessage = useCallback((callback: (message: ChatMessageData) => void) => {
+    if (socket) {
+      socket.on('new_message', callback);
+      return () => socket.off('new_message', callback);
+    }
+  }, [socket]);
+
   // Request browser notification permission
   const requestNotificationPermission = useCallback(async () => {
     if ('Notification' in window) {
@@ -155,6 +173,8 @@ export const useSocket = () => {
     leaveConversation,
     startTyping,
     stopTyping,
+    sendChatMessage,
+    onChatMessage,
     notifications,
     unreadCount,
     requestNotificationPermission,

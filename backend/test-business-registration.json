@@ -1,0 +1,23 @@
+{
+  "name": "Jan Kowalski",
+  "email": "jan@example.com", 
+  "password": "password123",
+  "businessName": "Kawiarnia Pod Lipą",
+  "businessDescription": "Przytulna kawiarnia w centrum miasta",
+  "category": "restaurants",
+  "companyMotto": "Najlepsza kawa w mieście",
+  "establishedYear": "2020",
+  "teamSize": "3-5",
+  "spokenLanguages": "Polish, English, Dutch",
+  "paymentMethods": "Gotówka, PIN, Visa, Mastercard",
+  "kvkNumber": "12345678",
+  "btwNumber": "NL123456789B01",
+  "iban": "NL02ABNA0123456789",
+  "street": "Marktplein 15",
+  "postalCode": "2500AB",
+  "city": "Den Haag",
+  "phone": "+31612345678",
+  "website": "https://kawiarniapodlipa.nl",
+  "instagram": "https://instagram.com/kawiarniapodlipa",
+  "facebook": "https://facebook.com/kawiarniapodlipa"
+}

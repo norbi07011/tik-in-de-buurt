@@ -8,6 +8,7 @@ import {
   MoreVerticalIcon as MoreVertical, 
   ArrowLeftIcon as ArrowLeft 
 } from '../components/icons/Icons';
+import { useSocket } from '../hooks/useSocket';
 // Toast will be inline
 
 export interface ChatMessage {
@@ -48,6 +49,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { socket, isConnected, sendChatMessage, onChatMessage, joinConversation, leaveConversation } = useSocket();
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -69,6 +71,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // WebSocket message handling
+  useEffect(() => {
+    if (socket && activeConversation && onChatMessage) {
+      const cleanup = onChatMessage((message) => {
+        if (message.conversationId === activeConversation.id) {
+          const newMessage: ChatMessage = {
+            id: message.id,
+            conversationId: message.conversationId,
+            senderId: message.senderId,
+            senderName: message.senderName,
+            content: message.content,
+            type: message.type,
+            mediaUrl: message.mediaUrl,
+            read: false,
+            createdAt: message.createdAt.toString()
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
+      });
+      
+      return cleanup || (() => {});
+    }
+  }, [socket, activeConversation, onChatMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,6 +137,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       if (!convResponse.ok) throw new Error('Failed to fetch conversation');
       const convData = await convResponse.json();
       setActiveConversation(convData.data);
+      
+      // Join WebSocket room for real-time updates
+      if (socket && isConnected) {
+        joinConversation(id);
+      }
 
       // Fetch messages
       const messagesResponse = await fetch(`/api/chat/conversations/${id}/messages`, {
@@ -148,28 +179,39 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !activeConversation || sending) return;
+    if (!newMessage.trim() || !activeConversation || sending || !isConnected) return;
 
     try {
       setSending(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/chat/conversations/${activeConversation.id}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      
+      // Send via WebSocket for real-time delivery
+      if (sendChatMessage) {
+        sendChatMessage({
+          conversationId: activeConversation.id,
           content: newMessage.trim(),
-          type: 'text',
-        }),
-      });
+          type: 'text'
+        });
+        setNewMessage('');
+      } else {
+        // Fallback to API if WebSocket not available
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/chat/conversations/${activeConversation.id}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: newMessage.trim(),
+            type: 'text',
+          }),
+        });
 
-      if (!response.ok) throw new Error('Failed to send message');
-
-      const data = await response.json();
-      setMessages(prev => [...prev, data.data]);
-      setNewMessage('');
+        if (!response.ok) throw new Error('Failed to send message');
+        const data = await response.json();
+        setMessages(prev => [...prev, data.data]);
+        setNewMessage('');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       setToast({ message: 'Błąd podczas wysyłania wiadomości', type: 'error' });

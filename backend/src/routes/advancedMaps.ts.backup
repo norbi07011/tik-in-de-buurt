@@ -1,0 +1,894 @@
+import { Router, Request, Response } from 'express';
+import { authenticateToken } from '../middleware/authSimple';
+import AdvancedLocationTrackingService from '../services/advancedLocationTrackingService';
+import GeofencingService from '../services/geofencingService';
+import AdvancedNavigationService from '../services/advancedNavigationService';
+import { logger } from '../utils/logger';
+
+const router = Router();
+
+// Initialize services
+const locationTrackingService = new AdvancedLocationTrackingService();
+const geofencingService = new GeofencingService();
+const navigationService = new AdvancedNavigationService();
+
+// =============================================================================
+// ADVANCED LOCATION TRACKING ROUTES
+// =============================================================================
+
+/**
+ * Start location tracking
+ */
+router.post('/location/tracking/start', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { trackingMode = 'balanced' } = req.body;
+
+    const result = await locationTrackingService.startLocationTracking(userId, trackingMode);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        trackingId: result.trackingId,
+        message: 'Location tracking started successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to start location tracking'
+      });
+    }
+  } catch (error) {
+    logger.error('Error starting location tracking:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Stop location tracking
+ */
+router.post('/location/tracking/stop', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const success = await locationTrackingService.stopLocationTracking(userId);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Location tracking stopped successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to stop location tracking'
+      });
+    }
+  } catch (error) {
+    logger.error('Error stopping location tracking:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Update current location
+ */
+router.post('/location/update', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.userId;
+    const { latitude, longitude, accuracy, altitude, heading, speed } = req.body;
+
+    if (!latitude || !longitude || !accuracy) {
+      res.status(400).json({
+        success: false,
+        error: 'Latitude, longitude, and accuracy are required'
+      });
+      return;
+    }
+
+    const location = { latitude, longitude, accuracy, altitude, heading, speed };
+    const success = await locationTrackingService.updateLocation(userId, location);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Location updated successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to update location'
+      });
+    }
+  } catch (error) {
+    logger.error('Error updating location:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get current location
+ */
+router.get('/location/current', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const location = await locationTrackingService.getCurrentLocation(userId);
+    
+    if (location) {
+      res.json({
+        success: true,
+        location
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Current location not found'
+      });
+    }
+  } catch (error) {
+    logger.error('Error getting current location:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get location history
+ */
+router.get('/location/history', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { startDate, endDate, limit = 100 } = req.query;
+
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
+
+    const history = await locationTrackingService.getLocationHistory(
+      userId, 
+      start, 
+      end, 
+      parseInt(limit as string)
+    );
+    
+    res.json({
+      success: true,
+      history,
+      count: history.length
+    });
+  } catch (error) {
+    logger.error('Error getting location history:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Start location sharing
+ */
+router.post('/location/sharing/start', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { sharedWith, durationMinutes = 60, permissions } = req.body;
+
+    if (!sharedWith || !Array.isArray(sharedWith)) {
+      return res.status(400).json({
+        success: false,
+        error: 'sharedWith must be an array of user IDs'
+      });
+    }
+
+    const result = await locationTrackingService.startLocationSharing(
+      userId, 
+      sharedWith, 
+      durationMinutes, 
+      permissions
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        sessionId: result.sessionId,
+        message: 'Location sharing started successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to start location sharing'
+      });
+    }
+  } catch (error) {
+    logger.error('Error starting location sharing:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Stop location sharing
+ */
+router.post('/location/sharing/stop/:sessionId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    const success = await locationTrackingService.stopLocationSharing(sessionId);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Location sharing stopped successfully'
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Location sharing session not found'
+      });
+    }
+  } catch (error) {
+    logger.error('Error stopping location sharing:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get shared locations
+ */
+router.get('/location/shared', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const sharedLocations = await locationTrackingService.getSharedLocations(userId);
+    
+    res.json({
+      success: true,
+      sharedLocations,
+      count: sharedLocations.length
+    });
+  } catch (error) {
+    logger.error('Error getting shared locations:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Create proximity alert
+ */
+router.post('/location/proximity-alert', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { targetUserId, radius, message } = req.body;
+
+    if (!targetUserId || !radius) {
+      return res.status(400).json({
+        success: false,
+        error: 'targetUserId and radius are required'
+      });
+    }
+
+    const result = await locationTrackingService.createProximityAlert(
+      userId, 
+      targetUserId, 
+      radius, 
+      message
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        alertId: result.alertId,
+        message: 'Proximity alert created successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Failed to create proximity alert'
+      });
+    }
+  } catch (error) {
+    logger.error('Error creating proximity alert:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get location analytics
+ */
+router.get('/location/analytics', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { days = 30 } = req.query;
+
+    const analytics = await locationTrackingService.generateLocationAnalytics(
+      userId, 
+      parseInt(days as string)
+    );
+    
+    if (analytics) {
+      res.json({
+        success: true,
+        analytics
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Insufficient location data for analytics'
+      });
+    }
+  } catch (error) {
+    logger.error('Error getting location analytics:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// GEOFENCING ROUTES
+// =============================================================================
+
+/**
+ * Create geofence
+ */
+router.post('/geofence', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req as any).user.userId;
+    const { name, geometry, type, triggers, metadata, description } = req.body;
+
+    if (!name || !geometry || !type || !triggers) {
+      return res.status(400).json({
+        success: false,
+        error: 'name, geometry, type, and triggers are required'
+      });
+    }
+
+    const result = await geofencingService.createGeofence(
+      ownerId, 
+      name, 
+      geometry, 
+      type, 
+      triggers, 
+      metadata, 
+      description
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        geofenceId: result.geofenceId,
+        message: 'Geofence created successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to create geofence'
+      });
+    }
+  } catch (error) {
+    logger.error('Error creating geofence:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Update geofence
+ */
+router.put('/geofence/:geofenceId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { geofenceId } = req.params;
+    const updates = req.body;
+
+    const result = await geofencingService.updateGeofence(geofenceId, updates);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Geofence updated successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to update geofence'
+      });
+    }
+  } catch (error) {
+    logger.error('Error updating geofence:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Delete geofence
+ */
+router.delete('/geofence/:geofenceId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { geofenceId } = req.params;
+
+    const result = await geofencingService.deleteGeofence(geofenceId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Geofence deleted successfully'
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error || 'Geofence not found'
+      });
+    }
+  } catch (error) {
+    logger.error('Error deleting geofence:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get user's geofences
+ */
+router.get('/geofence/my', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req as any).user.userId;
+
+    const geofences = await geofencingService.getGeofencesByOwner(ownerId);
+    
+    res.json({
+      success: true,
+      geofences,
+      count: geofences.length
+    });
+  } catch (error) {
+    logger.error('Error getting user geofences:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get geofences in area
+ */
+router.get('/geofence/area', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { latitude, longitude, radius = 5 } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'latitude and longitude are required'
+      });
+    }
+
+    const center = { 
+      latitude: parseFloat(latitude as string), 
+      longitude: parseFloat(longitude as string) 
+    };
+    const radiusKm = parseFloat(radius as string);
+
+    const geofences = await geofencingService.getGeofencesInArea(center, radiusKm);
+    
+    res.json({
+      success: true,
+      geofences,
+      count: geofences.length
+    });
+  } catch (error) {
+    logger.error('Error getting geofences in area:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Process location update for geofencing
+ */
+router.post('/geofence/location-update', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { latitude, longitude, accuracy } = req.body;
+
+    if (!latitude || !longitude || !accuracy) {
+      return res.status(400).json({
+        success: false,
+        error: 'latitude, longitude, and accuracy are required'
+      });
+    }
+
+    const location = { latitude, longitude, accuracy };
+    const events = await geofencingService.processLocationUpdate(userId, location);
+    
+    res.json({
+      success: true,
+      events,
+      eventCount: events.length
+    });
+  } catch (error) {
+    logger.error('Error processing geofence location update:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get geofence events
+ */
+router.get('/geofence/events', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { geofenceId, eventType, startDate, endDate, limit = 100 } = req.query;
+
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
+
+    const events = await geofencingService.getGeofenceEvents(
+      userId,
+      geofenceId as string,
+      eventType as any,
+      start,
+      end,
+      parseInt(limit as string)
+    );
+    
+    res.json({
+      success: true,
+      events,
+      count: events.length
+    });
+  } catch (error) {
+    logger.error('Error getting geofence events:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get current zones for user
+ */
+router.get('/geofence/current-zones', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const zones = await geofencingService.getCurrentZones(userId);
+    
+    res.json({
+      success: true,
+      zones,
+      count: zones.length
+    });
+  } catch (error) {
+    logger.error('Error getting current zones:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// ADVANCED NAVIGATION ROUTES  
+// =============================================================================
+
+/**
+ * Create navigation route
+ */
+router.post('/navigation/route', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { waypoints, options, name, metadata } = req.body;
+
+    if (!waypoints || !Array.isArray(waypoints) || waypoints.length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: 'waypoints must be an array with at least 2 waypoints'
+      });
+    }
+
+    if (!options || !options.mode) {
+      return res.status(400).json({
+        success: false,
+        error: 'options with mode are required'
+      });
+    }
+
+    const result = await navigationService.createRoute(
+      userId, 
+      waypoints, 
+      options, 
+      name, 
+      metadata
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        routeId: result.routeId,
+        route: result.route,
+        message: 'Navigation route created successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to create route'
+      });
+    }
+  } catch (error) {
+    logger.error('Error creating navigation route:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Start navigation
+ */
+router.post('/navigation/start/:routeId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { routeId } = req.params;
+    const { currentLocation } = req.body;
+
+    if (!currentLocation || !currentLocation.latitude || !currentLocation.longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'currentLocation with latitude and longitude are required'
+      });
+    }
+
+    const result = await navigationService.startNavigation(userId, routeId, currentLocation);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        sessionId: result.sessionId,
+        message: 'Navigation started successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to start navigation'
+      });
+    }
+  } catch (error) {
+    logger.error('Error starting navigation:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Update navigation
+ */
+router.post('/navigation/update/:sessionId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const { currentLocation } = req.body;
+
+    if (!currentLocation || !currentLocation.latitude || !currentLocation.longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'currentLocation with latitude and longitude are required'
+      });
+    }
+
+    const result = await navigationService.updateNavigation(sessionId, currentLocation);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        instruction: result.instruction,
+        nextInstructions: result.nextInstructions,
+        needsReroute: result.needsReroute,
+        message: 'Navigation updated successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to update navigation'
+      });
+    }
+  } catch (error) {
+    logger.error('Error updating navigation:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Reroute navigation
+ */
+router.post('/navigation/reroute/:sessionId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const { currentLocation, avoidAreas } = req.body;
+
+    if (!currentLocation || !currentLocation.latitude || !currentLocation.longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'currentLocation with latitude and longitude are required'
+      });
+    }
+
+    const result = await navigationService.rerouteNavigation(sessionId, currentLocation, avoidAreas);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        newRoute: result.newRoute,
+        message: 'Navigation rerouted successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to reroute navigation'
+      });
+    }
+  } catch (error) {
+    logger.error('Error rerouting navigation:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Stop navigation
+ */
+router.post('/navigation/stop/:sessionId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    const result = await navigationService.stopNavigation(sessionId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Navigation stopped successfully'
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error || 'Navigation session not found'
+      });
+    }
+  } catch (error) {
+    logger.error('Error stopping navigation:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get points of interest
+ */
+router.get('/navigation/points-of-interest', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { latitude, longitude, radius = 1000, category, limit = 20 } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'latitude and longitude are required'
+      });
+    }
+
+    const location = {
+      latitude: parseFloat(latitude as string),
+      longitude: parseFloat(longitude as string)
+    };
+
+    const pois = await navigationService.getPointsOfInterest(
+      location,
+      parseInt(radius as string),
+      category as string,
+      parseInt(limit as string)
+    );
+    
+    res.json({
+      success: true,
+      pointsOfInterest: pois,
+      count: pois.length
+    });
+  } catch (error) {
+    logger.error('Error getting points of interest:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Add traffic update
+ */
+router.post('/navigation/traffic', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { location, radius, severity, type, description, estimatedEndTime } = req.body;
+
+    if (!location || !location.latitude || !location.longitude || !radius || !severity || !type || !description) {
+      return res.status(400).json({
+        success: false,
+        error: 'location, radius, severity, type, and description are required'
+      });
+    }
+
+    const endTime = estimatedEndTime ? new Date(estimatedEndTime) : undefined;
+
+    const result = await navigationService.addTrafficUpdate(
+      location,
+      radius,
+      severity,
+      type,
+      description,
+      endTime
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        updateId: result.updateId,
+        message: 'Traffic update added successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to add traffic update'
+      });
+    }
+  } catch (error) {
+    logger.error('Error adding traffic update:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get active navigation sessions
+ */
+router.get('/navigation/sessions/active', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const sessions = await navigationService.getActiveNavigationSessions(userId);
+    
+    res.json({
+      success: true,
+      sessions,
+      count: sessions.length
+    });
+  } catch (error) {
+    logger.error('Error getting active navigation sessions:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * Get user's saved routes
+ */
+router.get('/navigation/routes', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const routes = await navigationService.getUserRoutes(userId);
+    
+    res.json({
+      success: true,
+      routes,
+      count: routes.length
+    });
+  } catch (error) {
+    logger.error('Error getting user routes:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// CLEANUP ENDPOINT (for maintenance)
+// =============================================================================
+
+/**
+ * Cleanup old data (admin only)
+ */
+router.post('/cleanup', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    // In a real app, you'd check for admin permissions here
+    const userRole = (req as any).user.role;
+    if (userRole !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: 'Admin access required'
+      });
+    }
+
+    await Promise.all([
+      locationTrackingService.cleanup(),
+      geofencingService.cleanup(),
+      navigationService.cleanup()
+    ]);
+    
+    res.json({
+      success: true,
+      message: 'Cleanup completed successfully'
+    });
+  } catch (error) {
+    logger.error('Error during cleanup:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+export default router;

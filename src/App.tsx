@@ -10,7 +10,9 @@ import BusinessesPage from '../pages/BusinessesPage';
 import RealEstatePage from '../pages/RealEstatePage';
 import PropertyListingPage from '../pages/PropertyListingPage';
 import BusinessProfilePage from '../pages/BusinessProfilePage';
+import UserProfilePage from '../pages/UserProfilePage';
 import AuthPage from '../pages/AuthPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 import AddAdPage from '../pages/AddAdPage';
 import LiveStreamPage from '../pages/LiveStreamPage';
 import SettingsPage from '../pages/SettingsPage';
@@ -27,6 +29,11 @@ import NorbsServicePage from '../pages/NorbsServicePage';
 import RegistrationSuccessPage from '../pages/RegistrationSuccessPage';
 import EditFreelancerCVPage from '../pages/EditFreelancerCVPage';
 import BusinessRegistrationPage from '../pages/BusinessRegistrationPage';
+import OpenStreetMapDemo from '../pages/OpenStreetMapDemo';
+import AdvancedFeaturesDemo from '../pages/AdvancedFeaturesDemo';
+import SearchPage from '../pages/SearchPage';
+import PaymentPage from '../pages/PaymentPage';
+import GeolocationPage from '../pages/GeolocationPage';
 import { UserIcon, Bars3Icon, XMarkIcon } from '../components/icons/Icons';
 import { useStore } from './store';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -194,7 +201,7 @@ const Header: React.FC<{ onMenuClick: () => void; currentUser: any }> = ({ onMen
 };
 
 const AppContent: React.FC = () => {
-  const { currentPage, activeBusinessId, activePropertyId, activeFreelancerId, user } = useStore();
+  const { currentPage, activeBusinessId, activePropertyId, activeFreelancerId, activeUserId, user, navigate } = useStore();
   const { user: authUser } = useAuth();
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -202,6 +209,23 @@ const AppContent: React.FC = () => {
 
   // Use auth user if available, fallback to store user
   const currentUser = authUser || user;
+
+  // Initialize from URL hash on app load
+  useEffect(() => {
+    const initializeFromHash = () => {
+      const hash = window.location.hash.slice(1); // Remove #
+      if (hash === 'openstreetmap-demo') {
+        navigate(Page.OpenStreetMapDemo);
+      }
+    };
+    
+    initializeFromHash();
+    
+    // Listen for hash changes
+    const handleHashChange = () => initializeFromHash();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [navigate]);
 
   useEffect(() => {
     if (previousPage.current !== currentPage) {
@@ -252,8 +276,12 @@ const AppContent: React.FC = () => {
             );
         case Page.BusinessProfile:
             return activeBusinessId ? <BusinessProfilePage businessId={activeBusinessId} /> : <BusinessesPage />;
+        case Page.UserProfile:
+            return activeUserId ? <UserProfilePage userId={activeUserId} /> : <HomePage />;
         case Page.Auth:
             return <AuthPage />;
+        case Page.ResetPassword:
+            return <ResetPasswordPage />;
         case Page.BusinessRegistration:
             return <BusinessRegistrationPage />;
         case Page.RegistrationSuccess:
@@ -284,6 +312,16 @@ const AppContent: React.FC = () => {
             return isBusinessUser ? <NorbsServicePage /> : <HomePage />;
         case Page.EditFreelancerCV:
             return isFreelancerUser ? <EditFreelancerCVPage freelancerId={user.freelancerId!} /> : <HomePage />;
+        case Page.OpenStreetMapDemo:
+            return <OpenStreetMapDemo />;
+        case Page.AdvancedFeaturesDemo:
+            return <AdvancedFeaturesDemo />;
+        case Page.Search:
+            return <SearchPage />;
+        case Page.Payment:
+            return <PaymentPage />;
+        case Page.Geolocation:
+            return <GeolocationPage />;
         default:
             return <HomePage />;
     }

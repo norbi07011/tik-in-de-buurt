@@ -1,6 +1,6 @@
 import Notification, { INotification, NotificationType } from '../models/Notification';
 import { logger } from '../utils/logger';
-// import { SocketService } from './socketService'; // Temporarily disabled to fix build
+import { SocketService } from './socketService';
 import { emailService } from './emailService';
 
 export interface CreateNotificationData {
@@ -31,15 +31,15 @@ class NotificationService {
       logger.info(`Notification created for user ${notificationData.recipientId}: ${notificationData.type}`);
 
       // Send real-time notification via WebSocket
-      // SocketService.sendNotificationToUser(notificationData.recipientId, {
-      //   id: (notification._id as any).toString(),
-      //   type: notification.type,
-      //   title: notification.title,
-      //   message: notification.message,
-      //   data: notification.data,
-      //   read: notification.read,
-      //   createdAt: notification.createdAt
-      // });
+      SocketService.sendNotificationToUser(notificationData.recipientId, {
+        id: (notification._id as any).toString(),
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        data: notification.data,
+        read: notification.read,
+        createdAt: notification.createdAt
+      });
 
       // Send email notification if requested
       if (notificationData.sendEmail) {
@@ -103,7 +103,7 @@ class NotificationService {
       }
 
       // Inform client about read status change
-      // SocketService.sendNotificationUpdate(userId, notificationId, { read: true });
+      SocketService.sendNotificationUpdate(userId, notificationId, { read: true });
       
       return true;
     } catch (error) {
@@ -124,7 +124,7 @@ class NotificationService {
 
       // Inform client about bulk read status change
       // Powiadomienie przez WebSocket o zmianie stanu wszystkich
-      // SocketService.sendBulkNotificationUpdate(userId, { allRead: true });
+      SocketService.sendBulkNotificationUpdate(userId, { allRead: true });
 
       logger.info(`Marked ${result.modifiedCount} notifications as read for user ${userId}`);
       return result.modifiedCount;
@@ -149,7 +149,7 @@ class NotificationService {
       }
 
       // Inform client about deletion
-      // SocketService.sendNotificationUpdate(userId, notificationId, { deleted: true });
+      SocketService.sendNotificationUpdate(userId, notificationId, { deleted: true });
 
       return true;
     } catch (error) {

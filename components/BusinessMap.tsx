@@ -30,11 +30,10 @@ const BusinessMap: React.FC<BusinessMapProps> = ({ address }) => {
             <iframe
                 width="100%"
                 height="100%"
-                className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'} border-0`}
                 loading="lazy"
                 allowFullScreen
                 src={mapUrl}
-                style={{ border: 0 }}
                 title={`Map of ${fullAddress}`}
             ></iframe>
         </div>

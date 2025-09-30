@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, ServerApiVersion } from 'mongodb';
 import { config } from '../config/env';
 
 class MongoConnection {
@@ -40,8 +40,13 @@ class MongoConnection {
         console.log(`🔗 Attempting MongoDB connection (${retryCount + 1}/${maxRetries})...`);
         
         this.client = new MongoClient(config.MONGODB_URI, {
-          serverSelectionTimeoutMS: 5000,
-          connectTimeoutMS: 5000,
+          serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+          },
+          serverSelectionTimeoutMS: 10000,
+          connectTimeoutMS: 10000,
         });
 
         await this.client.connect();

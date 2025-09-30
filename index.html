@@ -2,14 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-to-8" />
+    <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tik in de buurt - Local social business platform" />
     <title>Tik in de buurt</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    
+    <!-- OpenStreetMap Demo CSS -->
+    <link rel="stylesheet" href="/openstreetmap.css">
     <style>
       :root { /* DARK THEME DEFAULT */
         --background: #000000;
@@ -94,8 +102,8 @@
       /* ENHANCED Glassmorphism */
       .glass-effect {
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
         border: 1px solid var(--glass-border);
       }
       
@@ -147,8 +155,8 @@
       /* NEW: Universal Glass Card Style for Business Profile Pages */
       .glass-card-style {
         background: rgba(20, 30, 48, 0.6); /* Dark, slightly blueish transparent */
-        backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
         border-radius: 1rem; /* 16px */
         border: 1px solid rgba(0, 255, 194, 0.15);
         position: relative;
@@ -196,8 +204,8 @@
         transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
         /* Applying glass effect to sidebar */
         background: var(--glass-bg);
-        backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
+        backdrop-filter: blur(24px);
         border-right: 1px solid var(--glass-border);
       }
       .sidebar.open {
@@ -602,8 +610,8 @@
         
         /* Glassmorphism Effect */
         background: rgba(20, 20, 30, 0.6);
-        backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(128, 90, 213, 0.3); /* Purple border */
         box-shadow: 0 0 20px rgba(128, 90, 213, 0.5); /* Purple glow */
       }
@@ -729,8 +737,8 @@
         inset: 8px;
         border-radius: 1rem;
         background: rgba(10, 25, 47, 0.3);
-        backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(0, 245, 201, 0.1);
         transform: translateZ(25px);
         transition: all 0.5s ease-in-out;
@@ -744,8 +752,8 @@
 
       .parent:hover .glass {
         transform: translateZ(50px) scale(0.95);
-        backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
       }
 
       .content {
@@ -771,7 +779,6 @@
       }
 
       .content .text {
-        display: block;
         margin-top: 0.75rem;
         color: #e5e7eb;
         font-size: 0.875rem;
@@ -780,7 +787,9 @@
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
+        display: block;
         -webkit-line-clamp: 5;
+        line-clamp: 5;
         -webkit-box-orient: vertical;
       }
       

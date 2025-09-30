@@ -7,7 +7,8 @@ interface AppState {
     activeBusinessId: number | null;
     activePropertyId: number | null;
     activeFreelancerId: number | null;
-    navigate: (page: Page, id?: number | null) => void;
+    activeUserId: string | null;
+    navigate: (page: Page, id?: number | null, userId?: string | null) => void;
 
     // Auth
     user: User | null;
@@ -73,6 +74,7 @@ export const useStore = create<AppState>((set, get) => ({
     activeBusinessId: null,
     activePropertyId: null,
     activeFreelancerId: null,
+    activeUserId: null,
     ...getInitialState(),
     pendingPlanId: null,
     fetchCount: 0,
@@ -80,11 +82,20 @@ export const useStore = create<AppState>((set, get) => ({
     toast: null,
 
     // Actions
-    navigate: (page, id = null) => {
+    navigate: (page, id = null, userId = null) => {
         window.scrollTo(0, 0);
-        const newState: Partial<AppState> = { currentPage: page, activeBusinessId: null, activePropertyId: null, activeFreelancerId: null };
+        const newState: Partial<AppState> = { 
+            currentPage: page, 
+            activeBusinessId: null, 
+            activePropertyId: null, 
+            activeFreelancerId: null,
+            activeUserId: null
+        };
         if (page === Page.BusinessProfile && typeof id === 'number') {
             newState.activeBusinessId = id;
+        }
+        if (page === Page.UserProfile && typeof userId === 'string') {
+            newState.activeUserId = userId;
         }
         if (page === Page.PropertyListing && typeof id === 'number') {
             newState.activePropertyId = id;

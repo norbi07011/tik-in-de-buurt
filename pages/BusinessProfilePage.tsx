@@ -17,6 +17,8 @@ import CommentsPanel from '../components/CommentsPanel';
 import { useDataFetcher } from '../hooks/useDataFetcher';
 import FuturisticSocials from '../components/FuturisticSocials';
 import CVCard from '../components/CVCard';
+import StreetViewButton from '../components/maps/StreetViewButton';
+import { useBusinessLocation } from '../src/hooks/useBusinessLocation';
 
 type Tab = 'wall' | 'information' | 'gallery' | 'our_ads' | 'reviews' | 'contact_location';
 
@@ -124,7 +126,7 @@ const BusinessProfilePage: React.FC<{ businessId: number }> = ({ businessId }) =
     const { navigate, user } = useStore();
     const [activeTab, setActiveTab] = useState<Tab>('wall');
     
-    const fetcher = useCallback(() => api.fetchBusinessProfileData(businessId), [businessId]);
+    const fetcher = useCallback(() => api.fetchBusinessProfileData(businessId.toString()), [businessId]);
     const { data, status, error, refetch } = useDataFetcher(fetcher);
 
     if (status === FetchStatus.Loading || status === FetchStatus.Idle) {
@@ -218,18 +220,32 @@ const BusinessProfilePage: React.FC<{ businessId: number }> = ({ businessId }) =
             case 'reviews':
                  return <BusinessReviews businessId={business.id} reviews={reviews} onReviewPosted={refetch} />;
             case 'contact_location':
+                const { coordinates, isStreetViewAvailable } = useBusinessLocation(business.address);
+                
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                        <div className="md:col-span-2 space-y-6">
                             <div className="glass-card-style p-6">
                                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">{t('location_map')}</h3>
                                <BusinessMap address={business.address} />
-                                {business.googleMapsUrl && (
-                                    <a href={business.googleMapsUrl} target="_blank" rel="noopener noreferrer" 
-                                        className="mt-4 inline-block w-full text-center px-6 py-3 text-sm font-bold text-[var(--primary-text)] bg-[var(--primary)] rounded-full hover:opacity-90 transition-opacity duration-300">
-                                        {t('view_on_google_maps')}
-                                    </a>
-                                )}
+                                <div className="mt-4 flex gap-2">
+                                    {business.googleMapsUrl && (
+                                        <a href={business.googleMapsUrl} target="_blank" rel="noopener noreferrer" 
+                                            className="flex-1 text-center px-6 py-3 text-sm font-bold text-[var(--primary-text)] bg-[var(--primary)] rounded-full hover:opacity-90 transition-opacity duration-300">
+                                            {t('view_on_google_maps')}
+                                        </a>
+                                    )}
+                                    {coordinates && isStreetViewAvailable && (
+                                        <StreetViewButton 
+                                            position={coordinates}
+                                            businessName={t(business.nameKey)}
+                                            address={`${business.address.street}, ${business.address.postalCode} ${business.address.city}`}
+                                            variant="primary"
+                                            size="md"
+                                            className="flex-1"
+                                        />
+                                    )}
+                                </div>
                            </div>
                            {business.otherLocations && business.otherLocations.length > 0 && (
                                <div className="glass-card-style p-6">
@@ -253,6 +269,19 @@ const BusinessProfilePage: React.FC<{ businessId: number }> = ({ businessId }) =
                                <p className="font-semibold text-[var(--text-primary)]">{business.address.street}</p>
                                <p className="text-[var(--text-secondary)]">{business.address.postalCode} {business.address.city}</p>
                                <p className="text-[var(--text-secondary)]">{business.address.country}</p>
+                               {coordinates && isStreetViewAvailable && (
+                                   <div className="mt-4">
+                                       <StreetViewButton 
+                                           position={coordinates}
+                                           businessName={t(business.nameKey)}
+                                           address={`${business.address.street}, ${business.address.postalCode} ${business.address.city}`}
+                                           variant="outline"
+                                           size="sm"
+                                           showLabel={true}
+                                           className="w-full"
+                                       />
+                                   </div>
+                               )}
                                <div className="border-t glass-card-divider pt-4 mt-4 space-y-2">
                                    <a href={`tel:${business.phone}`} className="flex items-center gap-3 text-[var(--text-secondary)] hover:text-[var(--primary)]">
                                       <PhoneIcon className="w-5 h-5"/> <span>{business.phone}</span>

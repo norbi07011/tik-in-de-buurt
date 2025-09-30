@@ -25,7 +25,9 @@ import notificationRoutes from './routes/notificationRoutes';
 import chatRoutes from './routes/chatRoutes';
 import locationRoutes from './routes/locations';
 import paymentRoutes from './routes/payments';
+import discountRoutes from './routes/discountCodes';
 import demoPaymentRoutes from './routes/demo-payments';
+import advancedSearchRoutes from './routes/advancedSearch';
 import { authenticateToken } from './middleware/auth';
 import { databaseFallback } from './middleware/database';
 import { SocketService } from './services/socketService';
@@ -94,7 +96,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/discount-codes', discountRoutes);
 app.use('/api/demo-payments', demoPaymentRoutes);
+app.use('/api/search', advancedSearchRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

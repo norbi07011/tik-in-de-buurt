@@ -15,6 +15,62 @@ export interface User {
   freelancerId?: number; // Added to link user to a freelancer profile
 }
 
+// Full User Interface based on backend User model
+export interface IUser {
+  _id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  password?: string;
+  userType: 'user' | 'business';
+  phone?: string;
+  businessId?: string;
+  freelancerId?: string;
+  isVerified: boolean;
+  isActive: boolean;
+  avatar?: string;
+  coverImage?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  birthday?: Date;
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  interests?: string[];
+  languages?: string[];
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    linkedin?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
+  preferences?: {
+    theme?: 'light' | 'dark' | 'auto';
+    language?: string;
+    notifications?: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+      marketing?: boolean;
+    };
+    privacy?: {
+      showEmail?: boolean;
+      showPhone?: boolean;
+      showLocation?: boolean;
+      showBirthday?: boolean;
+    };
+  };
+  lastLogin?: Date;
+  emailVerifiedAt?: Date;
+  passwordResetAt?: Date;
+  isPhoneVerified?: boolean;
+  phoneVerifiedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Address {
   street: string;
   postalCode: string;
@@ -401,7 +457,9 @@ export enum Page {
     PropertyListing = 'property_listing',
     AddAd = 'add_ad',
     BusinessProfile = 'business_profile',
+    UserProfile = 'user_profile',
     Auth = 'auth',
+    ResetPassword = 'reset_password',
     LiveStream = 'live_stream',
     Settings = 'settings',
     Saved = 'saved',
@@ -414,6 +472,11 @@ export enum Page {
     RegistrationSuccess = 'registration_success',
     EditFreelancerCV = 'edit_freelancer_cv',
     BusinessRegistration = 'business_registration',
+    OpenStreetMapDemo = 'openstreetmap_demo',
+    AdvancedFeaturesDemo = 'advanced_features_demo',
+    Search = 'search',
+    Payment = 'payment',
+    Geolocation = 'geolocation',
 }
 
 export enum FetchStatus {

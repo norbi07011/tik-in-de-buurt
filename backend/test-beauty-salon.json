@@ -1,0 +1,23 @@
+{
+  "name": "Anna Kowalczyk",
+  "email": "anna@frisurezweerd.nl", 
+  "password": "password123",
+  "businessName": "Frisure Zweerd",
+  "businessDescription": "Nowoczesny salon fryzjerski w centrum Den Haag",
+  "category": "beauty",
+  "companyMotto": "Twój wygląd to nasza pasja",
+  "establishedYear": "2019",
+  "teamSize": "2-3",
+  "spokenLanguages": "Polish, Dutch, English",
+  "paymentMethods": "PIN, Gotówka, Apple Pay",
+  "kvkNumber": "87654321",
+  "btwNumber": "NL987654321B01",
+  "iban": "NL91ABNA9876543210",
+  "street": "Lange Voorhout 25",
+  "postalCode": "2514EB",
+  "city": "Den Haag",
+  "phone": "+31687654321",
+  "website": "https://frisurezweerd.nl",
+  "instagram": "https://instagram.com/frisurezweerd",
+  "facebook": "https://facebook.com/frisurezweerd"
+}

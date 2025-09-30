@@ -49,7 +49,7 @@ const BUSINESS_CATEGORIES = [
 export const BusinessRegistrationPage: React.FC = () => {
   const { t } = useTranslation();
   const { navigate } = useStore();
-  const { login } = useAuth();
+  const { registerBusiness } = useAuth();
   
   const [formData, setFormData] = useState<BusinessFormData>({
     name: '',
@@ -128,10 +128,8 @@ export const BusinessRegistrationPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const response = await api.registerBusiness(formData);
-      
-      // Use the login method from AuthContext to set user and token
-      await login(formData.email, formData.password);
+      // Use registerBusiness from AuthContext - no need for separate API call
+      await registerBusiness(formData);
       
       setToast({ message: 'Business registered successfully!', type: 'success' });
       

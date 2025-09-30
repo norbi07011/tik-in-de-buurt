@@ -116,7 +116,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
                             <div className="progress-bar mt-2 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div 
                                     className="progress-fill h-full bg-blue-500 transition-all duration-300"
-                                    style={{ '--upload-progress': `${uploadProgress}%` } as React.CSSProperties} /* eslint-disable-line */
+                                    data-upload-progress={`${uploadProgress}%`}
                                 ></div>
                             </div>
                             <p className="text-sm text-gray-600 mt-1">{uploadProgress}%</p>

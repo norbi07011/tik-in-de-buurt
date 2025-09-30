@@ -171,22 +171,22 @@ const AddAdPage: React.FC = () => {
                     return (
                          <div className="space-y-4">
                             <h3 className="text-xl font-bold text-center mb-4">{t('property_details')}</h3>
-                            <div><label className="input-label">{t('title')}</label><input name="title" value={propertyData.title} onChange={handlePropertyChange} required className="input-field" /></div>
+                            <div><label className="input-label">{t('title')}</label><input name="title" value={propertyData.title} onChange={handlePropertyChange} required className="input-field" placeholder={t('property_title_placeholder')} aria-label={t('title')} /></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="input-label">{t('property_status')}</label><select name="status" value={propertyData.status} onChange={handlePropertyChange} className="input-field"><option value={PropertyStatus.ForSale}>{t('for_sale')}</option><option value={PropertyStatus.ForRent}>{t('for_rent')}</option></select></div>
-                                <div><label className="input-label">{t('property_type')}</label><select name="type" value={propertyData.type} onChange={handlePropertyChange} className="input-field"><option value={PropertyType.House}>{t('house')}</option><option value={PropertyType.Apartment}>{t('apartment')}</option></select></div>
+                                <div><label className="input-label">{t('property_status')}</label><select name="status" value={propertyData.status} onChange={handlePropertyChange} className="input-field" aria-label={t('property_status')}><option value={PropertyStatus.ForSale}>{t('for_sale')}</option><option value={PropertyStatus.ForRent}>{t('for_rent')}</option></select></div>
+                                <div><label className="input-label">{t('property_type')}</label><select name="type" value={propertyData.type} onChange={handlePropertyChange} className="input-field" aria-label={t('property_type')}><option value={PropertyType.House}>{t('house')}</option><option value={PropertyType.Apartment}>{t('apartment')}</option></select></div>
                             </div>
-                            <div><label className="input-label">{t('price')}</label><input name="price" type="number" value={propertyData.price} onChange={handlePropertyChange} className="input-field" /></div>
+                            <div><label className="input-label">{t('price')}</label><input name="price" type="number" value={propertyData.price} onChange={handlePropertyChange} className="input-field" placeholder="0" aria-label={t('price')} /></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="input-label">{t('street_address')}</label><input name="street" value={propertyData.street} onChange={handlePropertyChange} className="input-field" /></div>
-                                <div><label className="input-label">{t('city')}</label><select name="city" value={propertyData.city} onChange={handlePropertyChange} className="input-field">{CITIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-                                <div><label className="input-label">{t('postal_code')}</label><input name="postalCode" value={propertyData.postalCode} onChange={handlePropertyChange} className="input-field" /></div>
+                                <div><label className="input-label">{t('street_address')}</label><input name="street" value={propertyData.street} onChange={handlePropertyChange} className="input-field" placeholder={t('street_placeholder') || 'Street address'} aria-label={t('street_address')} /></div>
+                                <div><label className="input-label">{t('city')}</label><select name="city" value={propertyData.city} onChange={handlePropertyChange} className="input-field" aria-label={t('city')}>{CITIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+                                <div><label className="input-label">{t('postal_code')}</label><input name="postalCode" value={propertyData.postalCode} onChange={handlePropertyChange} className="input-field" placeholder="1234 AB" aria-label={t('postal_code')} /></div>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div><label className="input-label">{t('bedrooms')}</label><input name="bedrooms" type="number" value={propertyData.bedrooms} onChange={handlePropertyChange} className="input-field" /></div>
-                                <div><label className="input-label">{t('bathrooms')}</label><input name="bathrooms" type="number" value={propertyData.bathrooms} onChange={handlePropertyChange} className="input-field" /></div>
-                                <div><label className="input-label">{t('living_area')}</label><input name="livingArea" type="number" value={propertyData.livingArea} onChange={handlePropertyChange} className="input-field" /></div>
-                                <div><label className="input-label">{t('year_built')}</label><input name="yearBuilt" type="number" value={propertyData.yearBuilt} onChange={handlePropertyChange} className="input-field" /></div>
+                                <div><label className="input-label">{t('bedrooms')}</label><input name="bedrooms" type="number" value={propertyData.bedrooms} onChange={handlePropertyChange} className="input-field" placeholder="1" aria-label={t('bedrooms')} /></div>
+                                <div><label className="input-label">{t('bathrooms')}</label><input name="bathrooms" type="number" value={propertyData.bathrooms} onChange={handlePropertyChange} className="input-field" placeholder="1" aria-label={t('bathrooms')} /></div>
+                                <div><label className="input-label">{t('living_area')}</label><input name="livingArea" type="number" value={propertyData.livingArea} onChange={handlePropertyChange} className="input-field" placeholder="50" aria-label={t('living_area')} /></div>
+                                <div><label className="input-label">{t('year_built')}</label><input name="yearBuilt" type="number" value={propertyData.yearBuilt} onChange={handlePropertyChange} className="input-field" placeholder="2020" aria-label={t('year_built')} /></div>
                             </div>
                             <div className="flex justify-between mt-6"><button type="button" onClick={() => { setStep(1); setAdType(null); }} className="btn-secondary">{t('back')}</button><button type="button" onClick={nextStep} className="btn-primary">{t('continue')}</button></div>
                         </div>
@@ -202,14 +202,14 @@ const AddAdPage: React.FC = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="input-label">{t('business_category')}</label>
-                                <select name="category" value={adData.category} onChange={e => setAdData(p => ({ ...p, category: e.target.value }))} className="input-field">
+                                <select name="category" value={adData.category} onChange={e => setAdData(p => ({ ...p, category: e.target.value }))} className="input-field" aria-label={t('business_category')}>
                                     <option value="">{t('all_categories')}</option>
                                     {CATEGORIES.map(cat => <option key={cat} value={cat}>{t(cat)}</option>)}
                                 </select>
                             </div>
                             <div>
                                 <label className="input-label">{t('city')}</label>
-                                <select name="city" value={adData.city} onChange={e => setAdData(p => ({ ...p, city: e.target.value }))} className="input-field">
+                                <select name="city" value={adData.city} onChange={e => setAdData(p => ({ ...p, city: e.target.value }))} className="input-field" aria-label={t('city')}>
                                     {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
@@ -315,7 +315,7 @@ const AddAdPage: React.FC = () => {
                         <div>
                             <h3 className="text-xl font-bold mb-1">{t('define_your_offer')}</h3>
                             <label className="input-label">{t('discount_percentage')}</label>
-                            <input type="number" value={adData.discountPercentage || ''} onChange={e => setAdData(p => ({ ...p, discountPercentage: Number(e.target.value) }))} className="input-field" />
+                            <input type="number" value={adData.discountPercentage || ''} onChange={e => setAdData(p => ({ ...p, discountPercentage: Number(e.target.value) }))} className="input-field" placeholder="10" aria-label={t('discount_percentage')} />
                             <p className="text-xs text-[var(--text-muted)] mt-1">{t('optional_for_deals_page')}</p>
                         </div>
                         <div>

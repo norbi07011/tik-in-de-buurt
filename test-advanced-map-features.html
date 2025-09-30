@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Map Features Demo - TikInDeBuurt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .demo-content {
+            padding: 40px;
+        }
+        
+        .feature-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(103, 126, 234, 0.1);
+        }
+        
+        .feature-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .theme-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .theme-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(103, 126, 234, 0.2);
+        }
+        
+        .theme-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+        
+        .theme-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .theme-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .theme-description {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .layer-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .layer-control:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e0;
+        }
+        
+        .layer-control.active {
+            background: #e3f2fd;
+            border-color: #667eea;
+        }
+        
+        .layer-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .layer-icon {
+            font-size: 1.5rem;
+        }
+        
+        .layer-details h4 {
+            color: #2d3748;
+            margin-bottom: 2px;
+        }
+        
+        .layer-details p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #cbd5e0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background: #667eea;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.complete {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.demo {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .integration-info {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .integration-info h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .integration-info p {
+            color: #388e3c;
+            line-height: 1.6;
+        }
+        
+        .code-snippet {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .code-snippet .keyword {
+            color: #569cd6;
+        }
+        
+        .code-snippet .string {
+            color: #ce9178;
+        }
+        
+        .code-snippet .property {
+            color: #9cdcfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Advanced Map Features</h1>
+            <p>Interactive themes and layer controls for Google Maps integration</p>
+        </div>
+        
+        <div class="demo-content">
+            <div class="feature-section">
+                <h2>🎨 Map Themes <span class="status-badge complete">✅ IMPLEMENTED</span></h2>
+                <p>Choose from professionally designed map themes to match your app's aesthetic</p>
+                
+                <div class="demo-grid" id="themes-grid">
+                    <div class="theme-card active" data-theme="standard">
+                        <span class="theme-icon">🗺️</span>
+                        <div class="theme-name">Standard</div>
+                        <div class="theme-description">Default Google Maps style</div>
+                    </div>
+                    <div class="theme-card" data-theme="dark">
+                        <span class="theme-icon">🌙</span>
+                        <div class="theme-name">Dark Mode</div>
+                        <div class="theme-description">Dark theme for night viewing</div>
+                    </div>
+                    <div class="theme-card" data-theme="retro">
+                        <span class="theme-icon">🎭</span>
+                        <div class="theme-name">Retro</div>
+                        <div class="theme-description">Vintage map styling</div>
+                    </div>
+                    <div class="theme-card" data-theme="silver">
+                        <span class="theme-icon">⚪</span>
+                        <div class="theme-name">Silver</div>
+                        <div class="theme-description">Clean monochrome styling</div>
+                    </div>
+                    <div class="theme-card" data-theme="aubergine">
+                        <span class="theme-icon">🍆</span>
+                        <div class="theme-name">Aubergine</div>
+                        <div class="theme-description">Deep purple luxury theme</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-section">
+                <h2>🗂️ Layer Controls <span class="status-badge complete">✅ IMPLEMENTED</span></h2>
+                <p>Toggle additional map layers for enhanced functionality</p>
+                
+                <div class="layer-control" data-layer="traffic">
+                    <div class="layer-info">
+                        <span class="layer-icon">🚦</span>
+                        <div class="layer-details">
+                            <h4>Traffic</h4>
+                            <p>Real-time traffic conditions</p>
+                        </div>
+                    </div>
+                    <div class="toggle-switch" onclick="toggleLayer('traffic')"></div>
+                </div>
+                
+                <div class="layer-control" data-layer="transit">
+                    <div class="layer-info">
+                        <span class="layer-icon">🚌</span>
+                        <div class="layer-details">
+                            <h4>Transit</h4>
+                            <p>Public transportation routes</p>
+                        </div>
+                    </div>
+                    <div class="toggle-switch" onclick="toggleLayer('transit')"></div>
+                </div>
+                
+                <div class="layer-control" data-layer="bicycle">
+                    <div class="layer-info">
+                        <span class="layer-icon">🚴</span>
+                        <div class="layer-details">
+                            <h4>Bicycle</h4>
+                            <p>Bike lanes and paths</p>
+                        </div>
+                    </div>
+                    <div class="toggle-switch" onclick="toggleLayer('bicycle')"></div>
+                </div>
+            </div>
+            
+            <div class="feature-section">
+                <h2>⚙️ Unified Controls <span class="status-badge demo">DEMO MODE</span></h2>
+                <p>Compact control panel combining themes and layers</p>
+                
+                <div class="code-snippet">
+&lt;<span class="keyword">AdvancedMapControls</span>
+  <span class="property">map</span>={map}
+  <span class="property">compact</span>={<span class="keyword">true</span>}
+  <span class="property">defaultTheme</span>=<span class="string">"standard"</span>
+  <span class="property">className</span>=<span class="string">"absolute top-4 right-4 z-10"</span>
+/&gt;
+                </div>
+                
+                <p>This combines both theme selection and layer controls into a single, space-efficient component perfect for map overlays.</p>
+            </div>
+            
+            <div class="integration-info">
+                <h3>🚀 Phase 2B Implementation Complete</h3>
+                <p>
+                    <strong>Advanced Map Features are now fully implemented and ready for use!</strong><br><br>
+                    ✅ <strong>Map Themes:</strong> 5 professionally designed themes (Standard, Dark, Retro, Silver, Aubergine)<br>
+                    ✅ <strong>Layer Controls:</strong> Traffic, Transit, and Bicycle layer toggles<br>
+                    ✅ <strong>Unified Interface:</strong> Compact control panel for space-efficient integration<br>
+                    ✅ <strong>Google Maps Integration:</strong> Seamless integration with existing map infrastructure<br><br>
+                    
+                    <em>Ready to enhance your map experience with customizable themes and informative layers!</em>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Theme selection functionality
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all themes
+                document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+                // Add active class to clicked theme
+                this.classList.add('active');
+                
+                const theme = this.dataset.theme;
+                console.log(`🎨 Theme changed to: ${theme}`);
+                
+                // In real implementation, this would call:
+                // mapInstance.setOptions({ styles: MAP_THEMES[theme].styles });
+            });
+        });
+        
+        // Layer toggle functionality
+        function toggleLayer(layerId) {
+            const layerControl = document.querySelector(`[data-layer="${layerId}"]`);
+            const toggle = layerControl.querySelector('.toggle-switch');
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                toggle.classList.remove('active');
+                layerControl.classList.remove('active');
+                console.log(`🗂️ Layer disabled: ${layerId}`);
+            } else {
+                toggle.classList.add('active');
+                layerControl.classList.add('active');
+                console.log(`🗂️ Layer enabled: ${layerId}`);
+            }
+            
+            // In real implementation, this would call:
+            // mapLayerService.toggleLayer(layerId, !isActive);
+        }
+        
+        // Demo initialization
+        console.log('🎨 Advanced Map Features Demo initialized');
+        console.log('✅ 5 Map themes available');
+        console.log('✅ 3 Layer controls ready');
+        console.log('✅ Unified control interface implemented');
+        console.log('🚀 Phase 2B Advanced Features - COMPLETE!');
+        
+        // Feature availability check
+        const features = {
+            themes: ['standard', 'dark', 'retro', 'silver', 'aubergine'],
+            layers: ['traffic', 'transit', 'bicycle'],
+            components: ['MapThemeSelector', 'MapLayerControls', 'AdvancedMapControls']
+        };
+        
+        console.log('📊 Feature inventory:', features);
+    </script>
+</body>
+</html>

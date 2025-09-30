@@ -5,7 +5,7 @@ import { api } from '../src/api';
 import { CATEGORIES, CITIES } from '../src/constants';
 import { Page, FetchStatus, Business, Category, CV } from '../src/types';
 import BusinessProfileSkeleton from '../components/skeletons/BusinessProfileSkeleton';
-import { CameraIcon, CheckCircleIcon, EnvelopeIcon, FacebookIcon, GlobeAltIcon, InstagramIcon, LinkedinIcon, MapPinIcon, PhoneIcon, TikTokIcon, TwitterIcon, BanknotesIcon, UserIcon } from '../components/icons/Icons';
+import { CameraIcon, CheckCircleIcon, EnvelopeIcon, FacebookIcon, GlobeAltIcon, InstagramIcon, LinkedinIcon, MapPinIcon, PhoneIcon, TikTokIcon, TwitterIcon, BanknotesIcon, UserIcon, ArrowLeftIcon } from '../components/icons/Icons';
 
 
 
@@ -35,11 +35,25 @@ const ImageUploader: React.FC<{
     return (
         <div className="flex flex-col items-center gap-2">
             <div className={`relative group ${aspectRatio} w-full max-w-[200px] rounded-lg overflow-hidden border-2 border-[var(--border-color)]`}>
-                <img src={previewUrl || currentImageUrl} alt={label} className="w-full h-full object-cover" />
+                {(previewUrl || currentImageUrl) ? (
+                    <img 
+                        src={previewUrl || currentImageUrl} 
+                        alt={label} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            e.currentTarget.src = '/api/placeholder/200/200';
+                        }}
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <CameraIcon className="w-12 h-12 text-gray-400" />
+                    </div>
+                )}
                 <button
                     type="button"
                     onClick={() => inputRef.current?.click()}
                     className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Upload ${label}`}
                 >
                     <CameraIcon className="w-8 h-8 text-white" />
                     <span className="text-white text-sm font-semibold mt-1">{label}</span>
@@ -84,20 +98,47 @@ const SettingsPage: React.FC = () => {
 
         const keys = name.split('.');
         if (keys.length > 1) {
+            // Handle nested address fields
             setBusiness({
                 ...business,
-                address: { ...business.address, [keys[1]]: value }
+                address: { 
+                    ...business.address, 
+                    [keys[1]]: value 
+                }
             });
         } else {
-            setBusiness({ ...business, [name]: value });
+            // Handle direct business fields with proper typing
+            setBusiness({ 
+                ...business, 
+                [name]: value 
+            });
         }
     };
     
-    // Simulate image upload by just updating the URL
+    // Handle image upload with proper error handling and validation
     const handleImageChange = (field: 'logoUrl' | 'coverImageUrl') => (file: File) => {
         if (!business) return;
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            useStore.getState().showToast('Image size must be less than 5MB', 'error');
+            return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            useStore.getState().showToast('Please select a valid image file', 'error');
+            return;
+        }
+        
         const tempUrl = URL.createObjectURL(file);
         setBusiness({ ...business, [field]: tempUrl });
+        
+        // Show success message
+        useStore.getState().showToast(
+            field === 'logoUrl' ? 'Logo updated successfully!' : 'Cover image updated successfully!', 
+            'success'
+        );
     };
 
     const handleSaveCv = async (newCvData: CV) => {
@@ -150,9 +191,20 @@ const SettingsPage: React.FC = () => {
             `}</style>
 
             <div className="max-w-4xl mx-auto">
-                <header className="text-center mb-10">
-                    <h1 className="text-3xl font-extrabold text-[var(--primary)]">{t('settings_title')}</h1>
-                    <p className="text-[var(--text-secondary)] mt-2">{t('settings_subtitle')}</p>
+                <header className="mb-10">
+                    <div className="flex items-center gap-4 mb-6">
+                        <button 
+                            onClick={() => useStore.getState().navigate(Page.Dashboard)}
+                            className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--border-color)] hover:bg-[var(--hover-bg)] transition-colors"
+                            aria-label="Go back to dashboard"
+                        >
+                            <ArrowLeftIcon className="w-5 h-5 text-[var(--text-primary)]" />
+                        </button>
+                        <div>
+                            <h1 className="text-3xl font-extrabold text-[var(--primary)]">{t('settings_title')}</h1>
+                            <p className="text-[var(--text-secondary)] mt-1">{t('settings_subtitle')}</p>
+                        </div>
+                    </div>
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
@@ -307,14 +359,14 @@ const SettingsPage: React.FC = () => {
                     <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl p-6">
                          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">{t('settings_section_links')}</h2>
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                             <div className="relative"><input name="website" type="url" value={business.website} onChange={handleInputChange} placeholder={t('website_url')} className="input-field pl-10" /><GlobeAltIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="googleMapsUrl" type="url" value={business.googleMapsUrl} onChange={handleInputChange} placeholder={t('google_maps_url')} className="input-field pl-10" /><MapPinIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="instagram" type="url" value={business.instagram} onChange={handleInputChange} placeholder={t('instagram_url')} className="input-field pl-10" /><InstagramIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="facebook" type="url" value={business.facebook} onChange={handleInputChange} placeholder={t('facebook_url')} className="input-field pl-10" /><FacebookIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="tiktokUrl" type="url" value={business.tiktokUrl} onChange={handleInputChange} placeholder={t('tiktok_url')} className="input-field pl-10" /><TikTokIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="twitter" type="url" value={business.twitter} onChange={handleInputChange} placeholder={t('twitter_url')} className="input-field pl-10" /><TwitterIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="linkedin" type="url" value={business.linkedin} onChange={handleInputChange} placeholder={t('linkedin_url')} className="input-field pl-10" /><LinkedinIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
-                             <div className="relative"><input name="otherLinkUrl" type="url" value={business.otherLinkUrl} onChange={handleInputChange} placeholder={t('other_link_url')} className="input-field pl-10" /><GlobeAltIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="website" type="url" value={business.website || ''} onChange={handleInputChange} placeholder={t('website_url')} className="input-field pl-10" aria-label={t('website_url')} /><GlobeAltIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="googleMapsUrl" type="url" value={business.googleMapsUrl || ''} onChange={handleInputChange} placeholder={t('google_maps_url')} className="input-field pl-10" aria-label={t('google_maps_url')} /><MapPinIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="instagram" type="url" value={business.instagram || ''} onChange={handleInputChange} placeholder={t('instagram_url')} className="input-field pl-10" aria-label={t('instagram_url')} /><InstagramIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="facebook" type="url" value={business.facebook || ''} onChange={handleInputChange} placeholder={t('facebook_url')} className="input-field pl-10" aria-label={t('facebook_url')} /><FacebookIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="tiktokUrl" type="url" value={business.tiktokUrl || ''} onChange={handleInputChange} placeholder={t('tiktok_url')} className="input-field pl-10" aria-label={t('tiktok_url')} /><TikTokIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="twitter" type="url" value={business.twitter || ''} onChange={handleInputChange} placeholder={t('twitter_url')} className="input-field pl-10" aria-label={t('twitter_url')} /><TwitterIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="linkedin" type="url" value={business.linkedin || ''} onChange={handleInputChange} placeholder={t('linkedin_url')} className="input-field pl-10" aria-label={t('linkedin_url')} /><LinkedinIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
+                             <div className="relative"><input name="otherLinkUrl" type="url" value={business.otherLinkUrl || ''} onChange={handleInputChange} placeholder={t('other_link_url')} className="input-field pl-10" aria-label={t('other_link_url')} /><GlobeAltIcon className="w-5 h-5 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" /></div>
                          </div>
                     </div>
 

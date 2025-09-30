@@ -169,7 +169,7 @@ const BusinessRegistrationForm: React.FC<{ onBack: () => void }> = ({ onBack }) 
             <div className="carousel-scene">
                 <div 
                     className="carousel-container"
-                    style={{ '--carousel-rotation': `${rotation}deg` } as React.CSSProperties} /* eslint-disable-line */
+                    data-rotation={`${rotation}deg`}
                 >
                     {stepsContent.map((_, index) => {
                         const stepNum = index + 1;
@@ -178,10 +178,8 @@ const BusinessRegistrationForm: React.FC<{ onBack: () => void }> = ({ onBack }) 
                              <div 
                                 key={stepNum}
                                 className="carousel-card"
-                                style={{ 
-                                    '--card-rotation': `${cardRotation}deg`,
-                                    '--card-translate-z': `${translateZ}px`
-                                } as React.CSSProperties} /* eslint-disable-line */
+                                data-card-rotation={`${cardRotation}deg`}
+                                data-card-translate-z={`${translateZ}px`}
                              >
                                  {renderStepContent(stepNum)}
                             </div>
@@ -208,6 +206,12 @@ const AuthPage: React.FC = () => {
     const [signupEmail, setSignupEmail] = useState('');
     const [signupPassword, setSignupPassword] = useState('');
     const [isSignupLoading, setIsSignupLoading] = useState(false);
+    
+    // Forgot password state
+    const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+    const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
+    const [forgotPasswordMessage, setForgotPasswordMessage] = useState('');
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -236,6 +240,25 @@ const AuthPage: React.FC = () => {
             showToast(t(errorMessage) || t('registration_error') || 'Registration failed', 'error');
         } finally {
             setIsSignupLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!forgotPasswordEmail) {
+            showToast('Please enter your email address', 'error');
+            return;
+        }
+        
+        setIsForgotPasswordLoading(true);
+        try {
+            const response = await api.forgotPassword(forgotPasswordEmail);
+            setForgotPasswordMessage(response.message);
+            showToast('Password reset instructions sent to your email', 'success');
+        } catch (err: any) {
+            showToast(err.message || 'Failed to send reset email', 'error');
+        } finally {
+            setIsForgotPasswordLoading(false);
         }
     };
 
@@ -281,6 +304,18 @@ const AuthPage: React.FC = () => {
                             <LockClosedIcon className="w-5 h-5" />
                         </div>
                         <button type="submit" disabled={isLoginLoading} className="submit-button mt-4">{t('login')}</button>
+                        
+                        {/* Forgot Password Link */}
+                        <div className="text-center mt-3">
+                            <button 
+                                type="button" 
+                                onClick={() => setIsForgotPasswordOpen(true)}
+                                className="text-sm text-blue-400 hover:text-blue-300 underline bg-transparent border-none cursor-pointer"
+                            >
+                                {t('forgot_password') || 'Forgot Password?'}
+                            </button>
+                        </div>
+                        
                         <div className="auth-form-link-wrapper md:hidden">
                             <span>{t('dont_have_account')} </span>
                             <button type="button" onClick={() => setIsRightPanelActive(true)} className="auth-form-link">{t('sign_up')}</button>
@@ -320,6 +355,88 @@ const AuthPage: React.FC = () => {
                     Advanced Business Registration →
                 </button>
             </div>
+
+            {/* Forgot Password Modal */}
+            {isForgotPasswordOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">
+                                {t('forgot_password') || 'Reset Password'}
+                            </h2>
+                            <button 
+                                onClick={() => {
+                                    setIsForgotPasswordOpen(false);
+                                    setForgotPasswordEmail('');
+                                    setForgotPasswordMessage('');
+                                }}
+                                className="text-gray-500 hover:text-gray-700 text-2xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        {forgotPasswordMessage ? (
+                            <div className="text-center">
+                                <div className="text-green-600 mb-4 p-3 bg-green-50 rounded-lg">
+                                    {forgotPasswordMessage}
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        setIsForgotPasswordOpen(false);
+                                        setForgotPasswordEmail('');
+                                        setForgotPasswordMessage('');
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                >
+                                    {t('close') || 'Close'}
+                                </button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleForgotPassword}>
+                                <p className="text-gray-600 mb-4">
+                                    {t('forgot_password_instruction') || 'Enter your email address and we\'ll send you instructions to reset your password.'}
+                                </p>
+                                
+                                <div className="auth-input-wrapper mb-4">
+                                    <input 
+                                        type="email" 
+                                        value={forgotPasswordEmail} 
+                                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                        required 
+                                        className="auth-input" 
+                                        placeholder={t('email_address') || 'Email Address'}
+                                        aria-label={t('email_address') || 'Email Address'}
+                                    />
+                                    <label>{t('email_address') || 'Email Address'}</label>
+                                    <EnvelopeIcon className="w-5 h-5" />
+                                </div>
+                                
+                                <div className="flex gap-3">
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            setIsForgotPasswordOpen(false);
+                                            setForgotPasswordEmail('');
+                                            setForgotPasswordMessage('');
+                                        }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    >
+                                        {t('cancel') || 'Cancel'}
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        disabled={isForgotPasswordLoading}
+                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        {isForgotPasswordLoading ? (t('sending') || 'Sending...') : (t('send_reset_link') || 'Send Reset Link')}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

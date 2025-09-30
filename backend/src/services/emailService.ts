@@ -41,6 +41,13 @@ class EmailService {
         return;
       }
 
+      // In development mode, always use mock unless full SMTP is configured
+      if (config.env === 'development' && (!config.email.auth.user || !config.email.auth.pass)) {
+        logger.info('📧 Email service running in MOCK mode for development');
+        this.isConfigured = false; // Force mock mode
+        return;
+      }
+
       // Konfiguracja SMTP
       this.transporter = nodemailer.createTransport({
         host: config.email.host,

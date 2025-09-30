@@ -3,6 +3,7 @@ import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import ClusterManager from './clustering/ClusterManager';
 import { DirectionsService, RouteControls, RoutePanel } from './directions';
 import { useRoute } from './directions/RouteProvider';
+import AdvancedMapControls from './AdvancedMapControls';
 
 // 🗺️ Types
 interface LatLngLiteral {
@@ -29,6 +30,9 @@ interface MapProps {
   onBusinessSelect?: (business: BusinessMarkerData) => void;
   showRouteControls?: boolean;
   showRoutePanel?: boolean;
+  // Advanced controls props
+  enableAdvancedControls?: boolean;
+  defaultMapTheme?: string;
 }
 
 interface BusinessMarkerData {
@@ -75,6 +79,8 @@ const MapComponent: React.FC<MapProps> = ({
   onBusinessSelect,
   showRouteControls = true,
   showRoutePanel = true,
+  enableAdvancedControls = false,
+  defaultMapTheme = 'standard',
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
@@ -424,6 +430,16 @@ const MapComponent: React.FC<MapProps> = ({
             routeContext.setSelectedStep(stepIndex);
             // Focus map on step location - implement later
           }}
+        />
+      )}
+      
+      {/* 🎨 Advanced Map Controls */}
+      {enableAdvancedControls && (
+        <AdvancedMapControls
+          map={map}
+          defaultTheme={defaultMapTheme}
+          compact={true}
+          className="absolute top-4 right-4 z-10"
         />
       )}
     </div>

@@ -98,7 +98,7 @@ const PropertyListingPage: React.FC<{ propertyId: number }> = ({ propertyId }) =
             const fetchedListing = await api.fetchPropertyListingById(id);
             setListing(fetchedListing);
             setEditedListing(fetchedListing);
-            const fetchedAgent = await api.fetchBusinessById(fetchedListing.businessId);
+            const fetchedAgent = await api.fetchBusinessById(fetchedListing.businessId.toString());
             setAgent(fetchedAgent);
             setStatus(FetchStatus.Success);
         } catch (err) {

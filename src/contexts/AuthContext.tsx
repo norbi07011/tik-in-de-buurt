@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '../types';
+import { IUser, Business } from '../types';
 import { api } from '../api';
 
 interface AuthContextType {
-  user: User | null;
+  user: IUser | null;
+  business: Business | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  registerBusiness: (data: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -27,7 +29,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,8 +40,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem('authToken');
-        const storedUser = localStorage.getItem('authUser');
+        const storedToken = localStorage.getItem('auth-token');
+        const storedUser = localStorage.getItem('auth-user');
 
         if (storedToken && storedUser) {
           setToken(storedToken);
@@ -47,11 +50,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Verify token is still valid by calling /me endpoint
           try {
             const response = await api.verifyToken();
-            setUser(response.user);
+            setUser(response.user as unknown as IUser);
           } catch (error) {
             // Token is invalid, clear auth state
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('authUser');
+            localStorage.removeItem('auth-token');
+            localStorage.removeItem('auth-user');
             setToken(null);
             setUser(null);
           }
@@ -71,11 +74,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.login(email, password);
       
-      setUser(response.user);
+      setUser(response.user as unknown as IUser);
       setToken(response.token);
       
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('authUser', JSON.stringify(response.user));
+      localStorage.setItem('auth-token', response.token);
+      localStorage.setItem('auth-user', JSON.stringify(response.user));
     } catch (error) {
       throw error;
     } finally {
@@ -88,11 +91,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.register(name, email, password);
       
-      setUser(response.user);
+      setUser(response.user as unknown as IUser);
       setToken(response.token);
       
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('authUser', JSON.stringify(response.user));
+      localStorage.setItem('auth-token', response.token);
+      localStorage.setItem('auth-user', JSON.stringify(response.user));
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const registerBusiness = async (data: any) => {
+    setIsLoading(true);
+    try {
+      const response = await api.registerBusiness(data);
+      
+      setUser(response.user as unknown as IUser);
+      setBusiness(response.business);
+      setToken(response.token);
+      
+      localStorage.setItem('auth-token', response.token);
+      localStorage.setItem('auth-user', JSON.stringify(response.user));
+      localStorage.setItem('auth-business', JSON.stringify(response.business));
     } catch (error) {
       throw error;
     } finally {
@@ -113,18 +135,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Clear local state regardless of API call result
       setUser(null);
       setToken(null);
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
       localStorage.removeItem('auth-token');
+      localStorage.removeItem('auth-user');
+      localStorage.removeItem('auth-business');
       setIsLoading(false);
     }
   };
 
   const value: AuthContextType = {
     user,
+    business,
     token,
     login,
     register,
+    registerBusiness,
     logout,
     isLoading,
     isAuthenticated,

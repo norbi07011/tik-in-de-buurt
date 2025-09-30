@@ -48,6 +48,9 @@
             margin: 10px 0;
             border-radius: 4px;
         }
+        .panel-spaced {
+            margin-top: 20px;
+        }
         .success { background: #d1fae5; color: #065f46; }
         .error { background: #fee2e2; color: #dc2626; }
         .info { background: #dbeafe; color: #1d4ed8; }
@@ -81,7 +84,7 @@
             
             <h3>Stwórz powiadomienie</h3>
             <input type="text" id="notif-user" placeholder="User ID (np. test-user)" value="test-user">
-            <select id="notif-type">
+            <select id="notif-type" aria-label="Select notification type">
                 <option value="like">Like</option>
                 <option value="comment">Comment</option>
                 <option value="follow">Follow</option>
@@ -119,7 +122,7 @@
     </div>
 
     <!-- Logi -->
-    <div class="panel" style="margin-top: 20px;">
+    <div class="panel panel-spaced">
         <h2>📋 Logi Systemowe</h2>
         <button onclick="clearLogs()">🧹 Wyczyść Logi</button>
         <div id="logs" class="log"></div>

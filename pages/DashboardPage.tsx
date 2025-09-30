@@ -6,6 +6,7 @@ import { FetchStatus, Page, Business, AdWithBusiness } from '../src/types';
 import PerformanceChart from '../components/dashboard/PerformanceChart';
 import SubscriptionWidget from '../components/dashboard/SubscriptionWidget';
 import TopAdsWidget from '../components/dashboard/TopAdsWidget';
+import ImprovedBusinessDashboard from '../components/dashboard/ImprovedBusinessDashboard';
 import { MegaphoneIcon, PencilIcon, ChartPieIcon } from '../components/icons/Icons';
 
 // Skeleton for the dashboard loading state
@@ -39,68 +40,25 @@ const QuickActionButton: React.FC<{ icon: React.ReactNode; label: string; onClic
 const DashboardPage: React.FC = () => {
     const { t } = useTranslation();
     const { user, navigate } = useStore();
-    const [business, setBusiness] = useState<Business | null>(null);
-    const [topAds, setTopAds] = useState<AdWithBusiness[]>([]);
-    const [status, setStatus] = useState(FetchStatus.Idle);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (user?.businessId) {
-                setStatus(FetchStatus.Loading);
-                try {
-                    const [businessData, adsData] = await Promise.all([
-                        api.fetchBusinessById(user.businessId),
-                        api.fetchAdsByBusinessId(user.businessId)
-                    ]);
-                    setBusiness(businessData);
-                    // Sort ads by likes to get the top ones
-                    const sortedAds = [...adsData].sort((a, b) => b.likeCount - a.likeCount).slice(0, 4);
-                    setTopAds(sortedAds);
-                    setStatus(FetchStatus.Success);
-                } catch (e) {
-                    setStatus(FetchStatus.Error);
-                }
-            }
-        };
-        fetchData();
-    }, [user]);
-    
-    if (status === FetchStatus.Loading || status === FetchStatus.Idle) {
-        return <DashboardSkeleton />;
-    }
-    
-    if (status === FetchStatus.Error || !business) {
-        return <div className="flex-grow flex items-center justify-center text-red-500">{t('error_loading_data')}</div>;
-    }
-
-    return (
-        <div className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
-            <header className="mb-8">
-                <h1 className="text-4xl font-extrabold text-white tracking-tighter">{t('dashboard')}</h1>
-                <p className="text-lg text-gray-400">{t('welcome_back')}, {user?.name}!</p>
-            </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    <PerformanceChart />
-                    <TopAdsWidget ads={topAds} />
-                </div>
-
-                {/* Right Sidebar */}
-                <div className="lg:col-span-1 space-y-6">
-                    <SubscriptionWidget business={business} />
-                    <div className="glass-card-style p-6">
-                        <h2 className="text-xl font-bold text-white mb-4">{t('quick_actions')}</h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <QuickActionButton icon={<MegaphoneIcon className="w-6 h-6"/>} label={t('create_new_ad')} onClick={() => navigate(Page.AddAd)} />
-                            <QuickActionButton icon={<PencilIcon className="w-6 h-6"/>} label={t('edit_your_profile')} onClick={() => navigate(Page.Settings)} />
-                        </div>
-                    </div>
+    if (!user?.businessId) {
+        return (
+            <div className="flex-grow flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-gray-400 mb-4">{t('no_business_found')}</p>
+                    <button
+                        onClick={() => navigate(Page.BusinessRegistration)}
+                        className="btn-primary"
+                    >
+                        {t('register_business')}
+                    </button>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+    // Use the improved dashboard component
+    return <ImprovedBusinessDashboard />;
 };
 
 export default DashboardPage;

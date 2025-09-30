@@ -19,7 +19,12 @@ router.get('/', optionalAuth, async (req: Request, res: Response): Promise<void>
     } = req.query;
 
     // Build query
-    const query: any = { subscriptionStatus: 'active' };
+    const query: any = {};
+    
+    // In production, only show active businesses
+    if (process.env.NODE_ENV === 'production') {
+      query.subscriptionStatus = 'active';
+    }
     
     if (category) {
       query.category = category;
