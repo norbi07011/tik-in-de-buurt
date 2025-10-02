@@ -25,7 +25,8 @@ const apiUrl = (path: string): string => {
 console.log('🔧 API Configuration:', {
   API_BASE_URL,
   USE_MOCK_API,
-  VITE_USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API
+  VITE_USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API,
+  VITE_API_URL: import.meta.env.VITE_API_URL
 });
 
 // In-memory database for simulation
@@ -1214,6 +1215,214 @@ export const api = {
                     headers: setAuthHeader(),
                     body: JSON.stringify(userData),
                 });
+            }
+        }),
+
+    // ============================================
+    // REAL MongoDB API Functions (NEW)
+    // ============================================
+
+    // Create Business (REAL - requires auth)
+    createBusiness: async (data: {
+        name: string;
+        description?: string;
+        category: string;
+        city: string;
+        street?: string;
+        postalCode?: string;
+        country?: string;
+    }): Promise<{ success: boolean; business: Business }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(1000);
+                const newBusiness: Business = {
+                    id: Date.now(),
+                    ownerId: Date.now() + 1,
+                    nameKey: data.name,
+                    descriptionKey: data.description || '',
+                    categoryKey: data.category as any,
+                    logoUrl: '',
+                    coverImageUrl: '',
+                    address: {
+                        street: data.street || '',
+                        postalCode: data.postalCode || '',
+                        city: data.city,
+                        country: data.country || 'Netherlands'
+                    },
+                    rating: 0,
+                    reviewCount: 0,
+                    adCount: 0,
+                    isVerified: false,
+                    phone: '',
+                    website: '',
+                    googleMapsUrl: '',
+                    instagram: '',
+                    facebook: '',
+                    twitter: '',
+                    linkedin: '',
+                    tiktokUrl: '',
+                    otherLinkUrl: '',
+                    openingHours: {},
+                    services: [],
+                    kvkNumber: '',
+                    btwNumber: '',
+                    iban: '',
+                    createdAt: new Date().toISOString(),
+                    subscriptionStatus: 'inactive' as const
+                };
+                return { success: true, business: newBusiness };
+            } else {
+                console.log('[API] createBusiness - Sending to REAL backend');
+                const response = await fetch(apiUrl('/business'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...setAuthHeader()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+                }
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Failed to create business');
+                }
+
+                console.log('[API] createBusiness - Success:', result);
+                return result;
+            }
+        }),
+
+    // Get My Business (REAL - requires auth)
+    meBusiness: async (): Promise<{ success: boolean; business: Business | null }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(500);
+                return { success: true, business: null };
+            } else {
+                console.log('[API] meBusiness - Fetching from REAL backend');
+                const response = await fetch(apiUrl('/business/me'), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...setAuthHeader()
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+                }
+
+                // 404 is OK - user doesn't have a business yet
+                if (response.status === 404) {
+                    console.log('[API] meBusiness - No business found (404)');
+                    return { success: true, business: null };
+                }
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Failed to fetch business');
+                }
+
+                console.log('[API] meBusiness - Success:', result);
+                return result;
+            }
+        }),
+
+    // Add Post (REAL - requires auth)
+    addPost: async (data: {
+        title: string;
+        body?: string;
+        type?: 'text' | 'image' | 'video';
+        city?: string;
+    }): Promise<{ success: boolean; post: any }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(800);
+                const newPost = {
+                    id: Date.now(),
+                    authorId: 1,
+                    businessId: null,
+                    type: data.type || 'text',
+                    title: data.title,
+                    body: data.body || '',
+                    city: data.city,
+                    likes: 0,
+                    comments: 0,
+                    views: 0,
+                    createdAt: new Date().toISOString()
+                };
+                return { success: true, post: newPost };
+            } else {
+                console.log('[API] addPost - Sending to REAL backend');
+                const response = await fetch(apiUrl('/posts'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...setAuthHeader()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+                }
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Failed to create post');
+                }
+
+                console.log('[API] addPost - Success:', result);
+                return result;
+            }
+        }),
+
+    // List Posts (REAL - public)
+    listPosts: async (limit: number = 20, city?: string): Promise<{ success: boolean; posts: any[]; total: number }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(500);
+                return { success: true, posts: [], total: 0 };
+            } else {
+                console.log('[API] listPosts - Fetching from REAL backend');
+                const params = new URLSearchParams();
+                params.append('limit', limit.toString());
+                if (city) params.append('city', city);
+
+                const response = await fetch(apiUrl(`/posts?${params.toString()}`), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+                }
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Failed to fetch posts');
+                }
+
+                console.log('[API] listPosts - Success:', result);
+                return result;
             }
         }),
 };

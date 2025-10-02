@@ -5,8 +5,12 @@ import { normalizeUser } from '../utils/normalize';
 import { api } from '../api';
 import tokenHelper from '../utils/token';
 
-const BUILDID = 'AU-2025-10-02-UNFREEZE-V2';
+const BUILDID = 'AU-2025-10-02-REAL-MIGRATION';
 console.log('[BUILDID]', BUILDID, 'AuthContext.tsx');
+
+// Check if using REAL API
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
+console.log('[AUTH_CONTEXT] USE_MOCK_API:', USE_MOCK_API);
 
 interface AuthContextType {
   user: User | null;
@@ -46,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state from localStorage
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const storedToken = tokenHelper.getToken();
         const storedUser = localStorage.getItem('auth-user');
@@ -58,33 +62,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           hasToken: !!storedToken,
           hasUser: !!storedUser,
           hasBusiness: !!storedBusiness,
-          userBusinessId: !!parsedUser?.businessId
+          userBusinessId: !!parsedUser?.businessId,
+          useMockAPI: USE_MOCK_API
         });
 
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(parsedUser);
           
-          if (storedBusiness) {
+          // REAL MODE: Fetch business from API
+          if (!USE_MOCK_API && parsedUser?.businessId) {
+            console.log('[AUTH_RESTORE] REAL mode - fetching business from API');
             try {
-              setBusiness(JSON.parse(storedBusiness));
-              console.log('[AUTH_RESTORE] ✅ Restored: token + user + business');
-            } catch (e) {
-              console.error('[AUTH_RESTORE] ❌ Failed to parse stored business:', e);
-              console.log('[AUTH_RESTORE] ✅ Restored: token + user only');
+              const businessResponse = await api.meBusiness();
+              if (businessResponse.success && businessResponse.business) {
+                setBusiness(businessResponse.business);
+                localStorage.setItem('auth-business', JSON.stringify(businessResponse.business));
+                console.log('[AUTH_RESTORE] ✅ Business fetched from API');
+              } else {
+                console.log('[AUTH_RESTORE] ⚠️ User has businessId but no business found in DB');
+              }
+            } catch (error) {
+              console.error('[AUTH_RESTORE] ❌ Failed to fetch business from API:', error);
             }
-          } else if (parsedUser?.businessId) {
-            // FALLBACK KRYTYCZNY: synthetic business object
-            const synthetic = {
-              id: parsedUser.businessId,
-              name: parsedUser.businessName ?? 'My Business',
-              status: 'synthetic'
-            };
-            setBusiness(synthetic as any);
-            localStorage.setItem('auth-business', JSON.stringify(synthetic));
-            console.warn('[AUTH_RESTORE] No auth-business; synthesized from user.businessId:', synthetic);
-          } else {
-            console.log('[AUTH_RESTORE] ✅ Restored: token + user, no business');
+          }
+          // MOCK MODE: Use synthetic business fallback
+          else if (USE_MOCK_API) {
+            if (storedBusiness) {
+              try {
+                setBusiness(JSON.parse(storedBusiness));
+                console.log('[AUTH_RESTORE] ✅ Restored: token + user + business (MOCK)');
+              } catch (e) {
+                console.error('[AUTH_RESTORE] ❌ Failed to parse stored business:', e);
+              }
+            } else if (parsedUser?.businessId) {
+              // FALLBACK KRYTYCZNY: synthetic business object (ONLY IN MOCK MODE)
+              const synthetic = {
+                id: parsedUser.businessId,
+                name: parsedUser.businessName ?? 'My Business',
+                status: 'synthetic'
+              };
+              setBusiness(synthetic as any);
+              localStorage.setItem('auth-business', JSON.stringify(synthetic));
+              console.warn('[AUTH_RESTORE] MOCK mode - synthesized business:', synthetic);
+            }
           }
         }
       } catch (error) {
@@ -115,6 +136,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log('[AUTH_LOGIN] ✅ Token saved (first 20):', response.token.substring(0, 20) + '...');
       console.log('[AUTH_LOGIN] ✅ User saved');
+      
+      // REAL MODE: Fetch business from API if user has businessId
+      if (!USE_MOCK_API && normalizedUser.businessId) {
+        console.log('[AUTH_LOGIN] REAL mode - fetching business from API');
+        try {
+          const businessResponse = await api.meBusiness();
+          if (businessResponse.success && businessResponse.business) {
+            setBusiness(businessResponse.business);
+            localStorage.setItem('auth-business', JSON.stringify(businessResponse.business));
+            console.log('[AUTH_LOGIN] ✅ Business fetched from API');
+          }
+        } catch (error) {
+          console.error('[AUTH_LOGIN] ⚠️ Failed to fetch business:', error);
+        }
+      }
+      
       console.log('[AUTH_LOGIN] ✅ Login successful');
     } catch (error) {
       console.error('[AUTH_LOGIN] ❌ Login failed:', error);
