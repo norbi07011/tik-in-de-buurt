@@ -224,22 +224,39 @@ export const useAdvancedSearch = () => {
   // Get trending searches
   const getTrending = useCallback(async () => {
     try {
-      const response = await fetch('/api/search/trending');
+      console.log('[TRENDING] Fetching trending data...');
+      const API_BASE_URL = (window as any).VITE_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/search/trending`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch trending data');
+        console.warn(`[TRENDING] HTTP ${response.status} ${response.statusText}`);
+        return { items: [] }; // Return empty array instead of null
+      }
+
+      // Safe JSON parse - check content-type
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        console.warn(`[TRENDING] Unexpected content-type: ${contentType} - returning empty`);
+        return { items: [] };
       }
 
       const data = await response.json();
+      console.log('[TRENDING] ✅ Data received:', data);
       
-      if (data.success) {
+      // Handle both response formats
+      if (data.items) {
+        // New mock format: { items: [...] }
+        return data;
+      } else if (data.success && data.trending) {
+        // Old format: { success, trending: {...} }
         return data.trending;
       }
       
-      return null;
+      console.warn('[TRENDING] Empty or invalid structure - returning empty');
+      return { items: [] };
     } catch (err) {
-      console.warn('Trending data error:', err);
-      return null;
+      console.warn('[TRENDING] ⚠️ empty due to fetch/parse error:', err);
+      return { items: [] }; // Always return safe fallback
     }
   }, []);
 

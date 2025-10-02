@@ -67,6 +67,8 @@ export const geocodeAddress = async (address: Address | string): Promise<Coordin
 const geocodeWithBackend = async (address: string): Promise<Coordinates | null> => {
   try {
     const API_BASE_URL = (window as any).VITE_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    console.log('[GEOCODE] Calling backend:', `${API_BASE_URL}/api/locations/geocode`);
+    
     const response = await fetch(`${API_BASE_URL}/api/locations/geocode`, {
       method: 'POST',
       headers: {
@@ -75,19 +77,41 @@ const geocodeWithBackend = async (address: string): Promise<Coordinates | null> 
       body: JSON.stringify({ address }),
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.result?.coordinates) {
-        return {
-          lat: data.result.coordinates.lat,
-          lng: data.result.coordinates.lng
-        };
-      }
+    if (!response.ok) {
+      console.warn(`[GEOCODE] HTTP ${response.status} ${response.statusText}`);
+      return null;
     }
+
+    // Safe JSON parse - check content-type
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      console.warn(`[GEOCODE] Unexpected content-type: ${contentType}`);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('[GEOCODE] Backend response:', data);
+    
+    // Handle both old and new response formats
+    if (data.lat && data.lng) {
+      // New mock format: { lat, lng, formatted, source }
+      return { lat: data.lat, lng: data.lng };
+    } else if (data.success && data.result?.coordinates) {
+      // Old format: { success, result: { coordinates: { lat, lng } } }
+      return {
+        lat: data.result.coordinates.lat,
+        lng: data.result.coordinates.lng
+      };
+    }
+    
+    console.warn('[GEOCODE] Invalid response structure:', data);
+    return null;
   } catch (error) {
-    console.warn('🗺️ Backend geocoding failed:', error);
+    console.warn('[GEOCODE] Backend geocoding failed:', error);
+    // Return fallback instead of null
+    console.warn('[GEOCODE] Using Amsterdam fallback');
+    return { lat: 52.3676, lng: 4.9041 }; // Amsterdam fallback
   }
-  return null;
 };
 
 /**

@@ -991,6 +991,123 @@ function generateHeatmapData() {
   return heatmapPoints;
 }
 
+// ============================================
+// GEOCODING ENDPOINTS (MOCK)
+// ============================================
+
+// Single geocode
+app.post('/api/locations/geocode', (req, res) => {
+  console.log('[GEOCODE] POST /api/locations/geocode');
+  const { address, city, postalCode, country } = req.body || {};
+  
+  console.log('[GEOCODE] Input:', { address, city, postalCode, country });
+  
+  // Simple city-based geocoding
+  let lat = 52.0, lng = 5.0; // Netherlands fallback
+  let formatted = 'Netherlands (fallback)';
+  
+  if (city) {
+    const cityLower = city.toLowerCase();
+    if (cityLower.includes('amsterdam')) {
+      lat = 52.3676;
+      lng = 4.9041;
+      formatted = 'Amsterdam, Netherlands';
+    } else if (cityLower.includes('rotterdam')) {
+      lat = 51.9244;
+      lng = 4.4777;
+      formatted = 'Rotterdam, Netherlands';
+    } else if (cityLower.includes('haag') || cityLower.includes('hague')) {
+      lat = 52.0705;
+      lng = 4.3007;
+      formatted = 'Den Haag, Netherlands';
+    } else if (cityLower.includes('utrecht')) {
+      lat = 52.0907;
+      lng = 5.1214;
+      formatted = 'Utrecht, Netherlands';
+    } else if (cityLower.includes('eindhoven')) {
+      lat = 51.4416;
+      lng = 5.4697;
+      formatted = 'Eindhoven, Netherlands';
+    } else {
+      formatted = `${city}, Netherlands`;
+    }
+  }
+  
+  const result = {
+    lat,
+    lng,
+    formatted,
+    source: 'mock',
+    input: { address, city, postalCode, country }
+  };
+  
+  console.log('[GEOCODE] ✅ Result:', result);
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json(result);
+});
+
+// Batch geocode
+app.post('/api/locations/geocode/batch', (req, res) => {
+  console.log('[GEOCODE_BATCH] POST /api/locations/geocode/batch');
+  const { items } = req.body || { items: [] };
+  
+  const results = items.map((item, index) => {
+    const { address, city, postalCode, country } = item;
+    
+    let lat = 52.0, lng = 5.0;
+    let formatted = 'Netherlands (fallback)';
+    
+    if (city) {
+      const cityLower = city.toLowerCase();
+      if (cityLower.includes('amsterdam')) {
+        lat = 52.3676 + (Math.random() - 0.5) * 0.1;
+        lng = 4.9041 + (Math.random() - 0.5) * 0.1;
+        formatted = `${city}, Netherlands`;
+      } else if (cityLower.includes('rotterdam')) {
+        lat = 51.9244 + (Math.random() - 0.5) * 0.1;
+        lng = 4.4777 + (Math.random() - 0.5) * 0.1;
+        formatted = `${city}, Netherlands`;
+      } else {
+        lat = 52.0 + (Math.random() - 0.5) * 1.0;
+        lng = 5.0 + (Math.random() - 0.5) * 1.0;
+        formatted = `${city}, Netherlands`;
+      }
+    }
+    
+    return { lat, lng, formatted, source: 'mock', index };
+  });
+  
+  console.log('[GEOCODE_BATCH] ✅ Processed', results.length, 'items');
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json({ results });
+});
+
+// ============================================
+// TRENDING/SEARCH ENDPOINTS (MOCK)
+// ============================================
+
+app.get('/api/search/trending', (req, res) => {
+  console.log('[TRENDING] GET /api/search/trending');
+  
+  const trendingItems = [
+    { id: '1', title: 'Restaurants in Amsterdam', score: 95, category: 'restaurants' },
+    { id: '2', title: 'Koffie & Thee', score: 88, category: 'cafes' },
+    { id: '3', title: 'Local Bakeries', score: 82, category: 'bakeries' },
+    { id: '4', title: 'Fitness Centers', score: 76, category: 'sports' },
+    { id: '5', title: 'Hair Salons', score: 71, category: 'beauty' },
+    { id: '6', title: 'Auto Repair', score: 68, category: 'services' },
+    { id: '7', title: 'Real Estate', score: 65, category: 'real-estate' },
+    { id: '8', title: 'Pet Shops', score: 59, category: 'pets' }
+  ];
+  
+  console.log('[TRENDING] ✅ Returning', trendingItems.length, 'items');
+  
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json({ items: trendingItems });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('💥 Server error:', err.message);
@@ -1019,7 +1136,12 @@ app.listen(PORT, '127.0.0.1', (err) => {
   console.log(`   POST /api/auth/register/business`);
   console.log(`   GET  /api/businesses`);
   console.log(`   GET  /api/businesses/:id`);
-  console.log(`   💳 Payment System:`);
+  console.log(`   � Geocoding:`);
+  console.log(`      POST /api/locations/geocode`);
+  console.log(`      POST /api/locations/geocode/batch`);
+  console.log(`   🔍 Search:`);
+  console.log(`      GET  /api/search/trending`);
+  console.log(`   �💳 Payment System:`);
   console.log(`      GET  /api/payments/methods`);
   console.log(`      POST /api/payments/process`);
   console.log(`      GET  /api/payments/status/:id`);
