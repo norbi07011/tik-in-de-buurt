@@ -124,23 +124,33 @@ const UserLocationMarker: React.FC = () => {
   const map = useMap();
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setPosition([latitude, longitude]);
-          // Center map on user location
-          map.setView([latitude, longitude], 13);
-        },
-        (error) => {
-          console.warn('Could not get user location:', error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 600000, // 10 minutes
-        }
-      );
+    try {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            try {
+              const { latitude, longitude } = pos.coords;
+              setPosition([latitude, longitude]);
+              // Center map on user location
+              if (map && map.setView) {
+                map.setView([latitude, longitude], 13);
+              }
+            } catch (error) {
+              console.warn('[OPENSTREETMAP] Error processing geolocation:', error);
+            }
+          },
+          (error) => {
+            console.warn('[OPENSTREETMAP] Could not get user location:', error);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 600000, // 10 minutes
+          }
+        );
+      }
+    } catch (error) {
+      console.warn('[OPENSTREETMAP] Geolocation setup error:', error);
     }
   }, [map]);
 
@@ -183,21 +193,45 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
 }) => {
   const [mapCenter, setMapCenter] = useState<[number, number]>(center);
   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleBusinessClick = (business: Business) => {
-    setSelectedBusiness(business);
-    if (onBusinessClick) {
-      onBusinessClick(business);
+    try {
+      setSelectedBusiness(business);
+      if (onBusinessClick) {
+        onBusinessClick(business);
+      }
+    } catch (error) {
+      console.warn('[OPENSTREETMAP] handleBusinessClick error:', error);
     }
   };
 
   const handleMapClick = (latlng: L.LatLng) => {
-    console.log('Map clicked at:', latlng.lat, latlng.lng);
-    // You can add custom functionality here (e.g., add new business)
+    try {
+      console.log('[OPENSTREETMAP] Map clicked at:', latlng.lat, latlng.lng);
+      // You can add custom functionality here (e.g., add new business)
+    } catch (error) {
+      console.warn('[OPENSTREETMAP] handleMapClick error:', error);
+    }
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        if (mapRef.current) {
+          mapRef.current.remove();
+          mapRef.current = null;
+        }
+      } catch (error) {
+        console.warn('[OPENSTREETMAP] Cleanup error:', error);
+      }
+    };
+  }, []);
+
   return (
-    <div className={`openstreetmap-container ${getHeightClass(height)} ${className}`}>
+    <div ref={containerRef} className={`openstreetmap-container ${getHeightClass(height)} ${className}`}>
       <MapContainer
         center={mapCenter}
         zoom={zoom}

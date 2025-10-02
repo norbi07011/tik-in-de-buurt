@@ -1,4 +1,5 @@
-const BUILDID = 'AU-2025-10-02-VER-2'; console.log('[BUILDID]', BUILDID, 'App.tsx');
+const BUILDID = 'AU-2025-10-02-UNFREEZE-V2'; 
+console.log('[BUILDID]', BUILDID, 'App.tsx');
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -301,7 +302,8 @@ const AppContent: React.FC = () => {
              return activePropertyId ? <PropertyListingPage propertyId={activePropertyId} /> : <RealEstatePage />;
         case Page.AddAd:
             return (
-                <ProtectedRoute requireAuth={true} requireBusiness={true}>
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
                     <AddAdPage />
                 </ProtectedRoute>
             );
@@ -319,7 +321,8 @@ const AppContent: React.FC = () => {
             return <RegistrationSuccessPage />;
         case Page.LiveStream:
             return (
-                <ProtectedRoute requireAuth={true} requireBusiness={true}>
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
                     <LiveStreamPage />
                 </ProtectedRoute>
             );
@@ -332,15 +335,35 @@ const AppContent: React.FC = () => {
         case Page.Saved:
             return user ? <SavedPage /> : <AuthPage />;
         case Page.Account:
-            return isBusinessUser ? <AccountPage /> : <HomePage />;
+            return (
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
+                    <AccountPage />
+                </ProtectedRoute>
+            );
         case Page.SubscriptionSuccess:
-            return isBusinessUser ? <SubscriptionSuccessPage /> : <HomePage />;
+            return (
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
+                    <SubscriptionSuccessPage />
+                </ProtectedRoute>
+            );
         case Page.Reviews:
-            return isBusinessUser ? <ReviewsPage businessId={parseInt(user.businessId!, 10)} /> : <HomePage />;
+            return (
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
+                    {user?.businessId ? <ReviewsPage businessId={parseInt(user.businessId, 10)} /> : <HomePage />}
+                </ProtectedRoute>
+            );
         case Page.Support:
             return <SupportPage />;
         case Page.MarketingServices:
-            return isBusinessUser ? <NorbsServicePage /> : <HomePage />;
+            return (
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after confirming business restore */}
+                    <NorbsServicePage />
+                </ProtectedRoute>
+            );
         case Page.EditFreelancerCV:
             return isFreelancerUser ? <EditFreelancerCVPage freelancerId={parseInt(user.freelancerId!, 10)} /> : <HomePage />;
         case Page.OpenStreetMapDemo:

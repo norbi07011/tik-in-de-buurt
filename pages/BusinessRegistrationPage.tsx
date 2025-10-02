@@ -6,7 +6,7 @@ import { useAuth } from '../src/contexts/AuthContext';
 import { api } from '../src/api';
 import { BuildingOffice2Icon } from '../components/icons/Icons';
 
-const BUILDID = 'AU-2025-10-02-VER-2';
+const BUILDID = 'AU-2025-10-02-UNFREEZE-V2';
 console.log('[BUILDID]', BUILDID, 'BusinessRegistrationPage.tsx');
 
 interface BusinessFormData {
@@ -131,32 +131,37 @@ export const BusinessRegistrationPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      console.log('[REGISTRATION] Starting registration...');
+      console.log('[REG] Starting registration...');
       
       const payloadForLog: any = { ...formData };
       delete payloadForLog.password;
       delete payloadForLog.confirmPassword;
-      console.log('[REGISTRATION] Payload:', JSON.stringify(payloadForLog, null, 2));
+      console.log('[REG] Payload:', JSON.stringify(payloadForLog, null, 2));
       
       await registerBusiness(formData);
       
-      console.log('[REGISTRATION] Registration successful!');
-      console.log('[REGISTRATION] navigating → #dashboard');
+      console.log('[REG] ✅ Registration successful!');
+      console.log('[REG] storage:', {
+        token: !!localStorage.getItem('auth-token'),
+        user: !!localStorage.getItem('auth-user'),
+        business: !!localStorage.getItem('auth-business')
+      });
+      console.log('[REG] Navigating → #dashboard');
       
       navigate(Page.Dashboard);
       
-      console.log('[REGISTRATION] Navigation complete, hash:', window.location.hash);
+      console.log('[REG] Navigation complete, hash:', window.location.hash);
       setTimeout(() => {
-        console.log('[REGISTRATION] hash+200ms:', window.location.hash);
+        console.log('[REG] hash+200ms:', window.location.hash);
       }, 200);
       
     } catch (error) {
-      console.error('🔴🔴🔴 [REGISTRATION] Registration failed:', error);
+      console.error('[REG] ❌ Registration failed:', error);
       if (error instanceof Error) {
-        console.error('🔴 [REGISTRATION] Error message:', error.message);
-        console.error('🔴 [REGISTRATION] Error stack:', error.stack);
+        console.error('[REG] Error message:', error.message);
+        console.error('[REG] Error stack:', error.stack);
       }
-      console.error('🔴 [REGISTRATION] Full error object:', JSON.stringify(error, null, 2));
+      console.error('[REG] Full error object:', JSON.stringify(error, null, 2));
       setToast({ 
         message: error instanceof Error ? error.message : 'Registration failed', 
         type: 'error' 

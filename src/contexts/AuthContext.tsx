@@ -5,7 +5,7 @@ import { normalizeUser } from '../utils/normalize';
 import { api } from '../api';
 import tokenHelper from '../utils/token';
 
-const BUILDID = 'AU-2025-10-02-VER-2';
+const BUILDID = 'AU-2025-10-02-UNFREEZE-V2';
 console.log('[BUILDID]', BUILDID, 'AuthContext.tsx');
 
 interface AuthContextType {
@@ -52,30 +52,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem('auth-user');
         const storedBusiness = localStorage.getItem('auth-business');
 
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
         console.log('[AUTH_RESTORE]', {
           hasToken: !!storedToken,
           hasUser: !!storedUser,
-          hasBusiness: !!storedBusiness
+          hasBusiness: !!storedBusiness,
+          userBusinessId: !!parsedUser?.businessId
         });
 
         if (storedToken && storedUser) {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(parsedUser);
           
           if (storedBusiness) {
             try {
               setBusiness(JSON.parse(storedBusiness));
-              console.log('🔐 Auth restored (token + user + business)');
+              console.log('[AUTH_RESTORE] ✅ Restored: token + user + business');
             } catch (e) {
-              console.error('❌ Failed to parse stored business:', e);
-              console.log('🔐 Auth restored (token + user only)');
+              console.error('[AUTH_RESTORE] ❌ Failed to parse stored business:', e);
+              console.log('[AUTH_RESTORE] ✅ Restored: token + user only');
             }
+          } else if (parsedUser?.businessId) {
+            // FALLBACK KRYTYCZNY: synthetic business object
+            const synthetic = {
+              id: parsedUser.businessId,
+              name: parsedUser.businessName ?? 'My Business',
+              status: 'synthetic'
+            };
+            setBusiness(synthetic as any);
+            localStorage.setItem('auth-business', JSON.stringify(synthetic));
+            console.warn('[AUTH_RESTORE] No auth-business; synthesized from user.businessId:', synthetic);
           } else {
-            console.log('🔐 Auth restored (token + user, no business)');
+            console.log('[AUTH_RESTORE] ✅ Restored: token + user, no business');
           }
         }
       } catch (error) {
-        console.error('❌ Failed to restore auth state:', error);
+        console.error('[AUTH_RESTORE] ❌ Failed to restore auth state:', error);
         logout();
       } finally {
         setIsLoading(false);
@@ -88,18 +101,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
-      console.log('🔐 Attempting login:', email);
+      console.log('[AUTH_LOGIN] Attempting login:', email);
       const response = await api.login(email, password);
       
       // Store auth data
-      setUser(normalizeUser(response.user));
+      const normalizedUser = normalizeUser(response.user);
+      
+      setUser(normalizedUser);
       setToken(response.token);
       tokenHelper.setToken(response.token);
-      localStorage.setItem('auth-user', JSON.stringify(normalizeUser(response.user)));
+      localStorage.setItem('auth-token', response.token);
+      localStorage.setItem('auth-user', JSON.stringify(normalizedUser));
       
-      console.log('✅ Login successful');
+      console.log('[AUTH_LOGIN] ✅ Token saved (first 20):', response.token.substring(0, 20) + '...');
+      console.log('[AUTH_LOGIN] ✅ User saved');
+      console.log('[AUTH_LOGIN] ✅ Login successful');
     } catch (error) {
-      console.error('❌ Login failed:', error);
+      console.error('[AUTH_LOGIN] ❌ Login failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
