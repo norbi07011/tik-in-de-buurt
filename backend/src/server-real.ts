@@ -225,14 +225,11 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       });
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user
+    // Create user (password will be hashed by model pre-save hook)
     const user = await User.create({
       name,
       email: email.toLowerCase(),
-      password: passwordHash,
+      password: password, // Model will hash this in pre-save hook
       userType: 'business',
       isVerified: false,
       isActive: true
@@ -275,7 +272,7 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
     }
 
     // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     if (!user) {
       console.log('[AUTH] ❌ User not found:', email);
       return res.status(401).json({
@@ -285,8 +282,17 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
       });
     }
 
+    console.log('[AUTH] 🔍 User found:', {
+      id: user._id,
+      email: user.email,
+      hasPassword: !!user.password,
+      passwordLength: user.password?.length
+    });
+
     // CRITICAL: Verify password with bcrypt (fixes "login with anything" bug)
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('[AUTH] 🔍 Password comparison result:', isPasswordValid);
+    
     if (!isPasswordValid) {
       console.log('[AUTH] ❌ Invalid password for:', email);
       return res.status(401).json({
