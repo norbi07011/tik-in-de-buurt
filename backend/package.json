@@ -7,6 +7,7 @@
     "start": "node dist/server.js",
     "start:stable": "node dist/stable-server.js",
     "dev": "node src/server.js",
+    "dev:real": "tsx src/server-real.ts",
     "dev:stable": "nodemon src/stable-server.ts",
     "dev:simple": "nodemon src/server-simple.ts",
     "dev:minimal": "nodemon src/server-minimal.ts",
@@ -14,6 +15,7 @@
     "cleanup": "echo 'Cleaning up processes...' && taskkill /F /IM node.exe || echo 'No Node processes to kill'",
     "ping": "tsx scripts/ping.ts",
     "seed": "ts-node scripts/seed.ts",
+    "test:e2e": "node e2e-smoke-test.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
