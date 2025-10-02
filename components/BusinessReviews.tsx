@@ -123,7 +123,7 @@ const BusinessReviews: React.FC<BusinessReviewsProps> = ({ businessId, reviews, 
     const { t } = useTranslation();
     const { user } = useStore();
     
-    const canLeaveReview = user?.businessId && user.businessId !== businessId;
+    const canLeaveReview = user?.businessId && parseInt(user.businessId) !== businessId;
 
     const businessReviews = reviews.filter(r => r.authorType === 'business');
     const customerReviews = reviews.filter(r => r.authorType !== 'business');
@@ -138,7 +138,7 @@ const BusinessReviews: React.FC<BusinessReviewsProps> = ({ businessId, reviews, 
     return (
         <div>
             {canLeaveReview && user.businessId && (
-                <ReviewForm businessId={businessId} authorBusinessId={user.businessId} onSubmitSuccess={onReviewPosted} />
+                <ReviewForm businessId={businessId} authorBusinessId={parseInt(user.businessId)} onSubmitSuccess={onReviewPosted} />
             )}
 
             {businessReviews.length > 0 && (

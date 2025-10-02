@@ -1,7 +1,9 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
-import LoadingBar from '../../components/common/LoadingBar';
+
+const BUILDID = 'AU-2025-10-02-VER-2';
+console.log('[BUILDID]', BUILDID, 'ProtectedRoute.tsx');
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,30 +20,25 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireFreelancer = false,
   fallback = <AuthPage />
 }) => {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { isAuthenticated, user, business } = useAuth();
 
-  if (isLoading) {
-    return <LoadingBar />;
-  }
+  console.log('[PROTECTED_ROUTE_CHECKS]', {
+    isAuthenticated,
+    requireAuth,
+    requireBusiness,
+    hasBusinessId: !!user?.businessId,
+    hasBusinessObj: !!business,
+    DEV: import.meta.env.DEV
+  });
 
-  // If auth is not required, always render children
-  if (!requireAuth) {
-    return <>{children}</>;
-  }
-
-  // If auth is required but user is not authenticated
   if (requireAuth && !isAuthenticated) {
-    return <>{fallback}</>;
+    console.warn('[PROTECTED_ROUTE_BLOCKED] reason: not authenticated');
+    return fallback;
   }
 
-  // If business role is required but user doesn't have businessId
-  if (requireBusiness && user && !user.businessId) {
-    return <>{fallback}</>;
-  }
-
-  // If freelancer role is required but user doesn't have freelancerId
-  if (requireFreelancer && user && !user.freelancerId) {
-    return <>{fallback}</>;
+  if (requireBusiness && !business) {
+    console.warn('[PROTECTED_ROUTE_BLOCKED] reason: no business object');
+    return fallback;
   }
 
   return <>{children}</>;

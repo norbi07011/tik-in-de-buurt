@@ -6,6 +6,9 @@ import { useAuth } from '../src/contexts/AuthContext';
 import { api } from '../src/api';
 import { BuildingOffice2Icon } from '../components/icons/Icons';
 
+const BUILDID = 'AU-2025-10-02-VER-2';
+console.log('[BUILDID]', BUILDID, 'BusinessRegistrationPage.tsx');
+
 interface BusinessFormData {
   // Owner info
   name: string;
@@ -128,17 +131,32 @@ export const BusinessRegistrationPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Use registerBusiness from AuthContext - no need for separate API call
+      console.log('[REGISTRATION] Starting registration...');
+      
+      const payloadForLog: any = { ...formData };
+      delete payloadForLog.password;
+      delete payloadForLog.confirmPassword;
+      console.log('[REGISTRATION] Payload:', JSON.stringify(payloadForLog, null, 2));
+      
       await registerBusiness(formData);
       
-      setToast({ message: 'Business registered successfully!', type: 'success' });
+      console.log('[REGISTRATION] Registration successful!');
+      console.log('[REGISTRATION] navigating → #dashboard');
       
+      navigate(Page.Dashboard);
+      
+      console.log('[REGISTRATION] Navigation complete, hash:', window.location.hash);
       setTimeout(() => {
-        navigate(Page.Dashboard);
-      }, 2000);
+        console.log('[REGISTRATION] hash+200ms:', window.location.hash);
+      }, 200);
       
     } catch (error) {
-      console.error('Business registration error:', error);
+      console.error('🔴🔴🔴 [REGISTRATION] Registration failed:', error);
+      if (error instanceof Error) {
+        console.error('🔴 [REGISTRATION] Error message:', error.message);
+        console.error('🔴 [REGISTRATION] Error stack:', error.stack);
+      }
+      console.error('🔴 [REGISTRATION] Full error object:', JSON.stringify(error, null, 2));
       setToast({ 
         message: error instanceof Error ? error.message : 'Registration failed', 
         type: 'error' 

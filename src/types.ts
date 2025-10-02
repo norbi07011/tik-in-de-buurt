@@ -8,14 +8,14 @@ export interface Language {
 }
 
 export interface User {
-  id: number;
+  _id: string;
   name: string;
   email: string;
-  businessId?: number;
-  freelancerId?: number; // Added to link user to a freelancer profile
+  businessId?: string;
+  freelancerId?: string; // Added to link user to a freelancer profile
 }
 
-// Full User Interface based on backend User model
+// Legacy interface - DEPRECATED, use User instead
 export interface IUser {
   _id: string;
   name: string;

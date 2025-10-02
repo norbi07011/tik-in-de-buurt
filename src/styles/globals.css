@@ -72,6 +72,70 @@ html {
 
 #root {
   min-height: 100vh;
+  width: 100%;
+}
+
+/* --- GRID UTILS --- */
+@layer utilities {
+  /* stałe wiersze grida oparte o wysokość karty */
+  .auto-rows-card { grid-auto-rows: 1fr; }           /* karty wypełniają rząd */
+  .auto-rows-max  { grid-auto-rows: max-content; }   /* karty dopasowują wysokość */
+
+  /* pomocnik na overlayy / sticky header vs main */
+  .safe-main { padding-top: var(--app-top, 72px); }   /* dostosuj do wysokości headera */
+
+  /* blokada „rozpychania" dzieci we flex */
+  .min-h-0 { min-height: 0; }
+}
+
+/* --- KARTA (wysokości) --- */
+/* Ustal spójną „logicznie stałą" wysokość części wizualnej karty, reszta elastyczna */
+:root {
+  --card-media-ratio: 4/5; /* możesz zmienić np. 16/9 */
+  --app-top: 64px; /* wysokość sticky header (h-16) */
+}
+
+.u-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.u-card .u-media {
+  aspect-ratio: var(--card-media-ratio);
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem; /* 12px */
+}
+
+.u-card .u-body {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding-top: .5rem;
+}
+
+/* na wszelki wypadek wyłącz niepotrzebne pozycjonowania w kartach */
+.u-card [data-abs="off"] { position: static !important; }
+
+/* Rozszerzenie istniejących klas parent/card do współpracy z u-card */
+.parent.u-card {
+  height: 100%;
+}
+
+.parent.u-card .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.parent.u-card .glass.u-media {
+  aspect-ratio: var(--card-media-ratio);
+  flex-shrink: 0;
+}
+
+.parent.u-card .content.u-body {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }

@@ -138,7 +138,7 @@ const BusinessReviews: React.FC<{ businessId: number }> = ({ businessId }) => {
     const [error, setError] = useState<Error | null>(null);
     const { user } = useStore();
     
-    const canLeaveReview = user?.businessId && user.businessId !== businessId;
+    const canLeaveReview = user?.businessId && parseInt(user.businessId) !== businessId;
 
     const fetchReviews = useCallback(async () => {
         setStatus(FetchStatus.Loading);
@@ -178,7 +178,7 @@ const BusinessReviews: React.FC<{ businessId: number }> = ({ businessId }) => {
     return (
         <div>
             {canLeaveReview && user.businessId && (
-                <ReviewForm businessId={businessId} authorBusinessId={user.businessId} onSubmitSuccess={fetchReviews} />
+                <ReviewForm businessId={businessId} authorBusinessId={parseInt(user.businessId)} onSubmitSuccess={fetchReviews} />
             )}
 
             {businessReviews.length > 0 && (

@@ -22,7 +22,7 @@ const TopAdsWidget: React.FC<{ ads: AdWithBusiness[] }> = ({ ads }) => {
                                 <span className="flex items-center gap-1"><ChatBubbleOvalLeftEllipsisIcon className="w-4 h-4 text-blue-400" /> {ad.commentCount}</span>
                             </div>
                         </div>
-                        <button onClick={() => { /* Open ad analytics modal in future */ alert('Ad analytics coming soon!') }} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
+                        <button onClick={() => { /* Open ad analytics modal in future */ alert('Ad analytics coming soon!') }} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors" aria-label="View ad analytics">
                             <ChartPieIcon className="w-5 h-5" />
                         </button>
                     </div>

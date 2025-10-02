@@ -66,7 +66,8 @@ export const geocodeAddress = async (address: Address | string): Promise<Coordin
  */
 const geocodeWithBackend = async (address: string): Promise<Coordinates | null> => {
   try {
-    const response = await fetch('/api/locations/geocode', {
+    const API_BASE_URL = (window as any).VITE_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    const response = await fetch(`${API_BASE_URL}/api/locations/geocode`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

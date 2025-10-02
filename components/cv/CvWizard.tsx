@@ -39,7 +39,8 @@ const ProgressBar: React.FC<{ currentStep: number; totalSteps: number }> = ({ cu
                 <span className="text-sm font-medium text-[var(--primary)]">{currentStep + 1} / {totalSteps}</span>
             </div>
             <div className="w-full bg-[var(--border-color)] rounded-full h-2.5">
-                <div className="bg-[var(--primary)] h-2.5 rounded-full" style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}></div>
+                {/* eslint-disable-next-line no-inline-styles */}
+                <div className="bg-[var(--primary)] h-2.5 rounded-full transition-all duration-500 ease-in-out" style={{width: `${progress}%`}}></div>
             </div>
         </div>
     );

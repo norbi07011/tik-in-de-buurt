@@ -1,0 +1,51 @@
+/* JobsPage specific styles */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-animate-delay-100 {
+  transition-delay: 100ms;
+}
+
+.scroll-animate-delay-200 {
+  transition-delay: 200ms;
+}
+
+.scroll-animate-delay-300 {
+  transition-delay: 300ms;
+}
+
+.scroll-animate-delay-400 {
+  transition-delay: 400ms;
+}
+
+.scroll-animate-delay-500 {
+  transition-delay: 500ms;
+}
+
+.scroll-animate-delay-600 {
+  transition-delay: 600ms;
+}
+
+.scroll-animate-delay-700 {
+  transition-delay: 700ms;
+}
+
+.scroll-animate-delay-800 {
+  transition-delay: 800ms;
+}
+
+.scroll-animate-delay-900 {
+  transition-delay: 900ms;
+}
+
+.scroll-animate-delay-1000 {
+  transition-delay: 1000ms;
+}

@@ -4,6 +4,7 @@ import { useStore } from '../src/store';
 import { api } from '../src/api';
 import { CATEGORIES, CITIES } from '../src/constants';
 import { Page, FetchStatus, Business, Category, CV } from '../src/types';
+import { User } from '../src/types/user';
 import BusinessProfileSkeleton from '../components/skeletons/BusinessProfileSkeleton';
 import { CameraIcon, CheckCircleIcon, EnvelopeIcon, FacebookIcon, GlobeAltIcon, InstagramIcon, LinkedinIcon, MapPinIcon, PhoneIcon, TikTokIcon, TwitterIcon, BanknotesIcon, UserIcon, ArrowLeftIcon } from '../components/icons/Icons';
 
@@ -79,7 +80,7 @@ const SettingsPage: React.FC = () => {
         if (!user) return;
         setStatus(FetchStatus.Loading);
         try {
-            const fetchedBusiness = await api.fetchBusinessByOwnerId(user.id);
+            const fetchedBusiness = await api.fetchBusinessByOwnerId(parseInt(user.id, 10));
             setBusiness(fetchedBusiness);
             setStatus(FetchStatus.Success);
         } catch (e: any) {

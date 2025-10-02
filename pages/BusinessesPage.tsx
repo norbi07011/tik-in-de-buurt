@@ -27,65 +27,67 @@ const UiverseBusinessCard: React.FC<{ business: Business }> = ({ business }) => 
     };
 
     return (
-        <div className="parent">
-          <div className="card" onClick={() => navigate(Page.BusinessProfile, business.id)}>
-            <div className="logo">
-              <span className="circle circle1"></span>
-              <span className="circle circle2"></span>
-              <span className="circle circle3"></span>
-              <span className="circle circle4"></span>
-              <span className="circle circle5">
-                UI
-              </span>
-            </div>
-            <div className="glass"></div>
-            <div className="content">
-              <h3 className="title">{t(business.nameKey)}</h3>
-              <p className="text">{t(business.descriptionKey)}</p>
-            </div>
-            <div className="bottom">
-              <div className="social-buttons-container">
-                {socials.slice(0, 2).map((social) => (
-                  <a
-                    key={social.type}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-button"
-                    aria-label={social.type}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                     {social.type === 'website' && <GlobeAltIcon className="svg" />}
-                     {social.type === 'instagram' && <InstagramIcon className="svg" />}
-                     {social.type === 'facebook' && <FacebookIcon className="svg" />}
-                     {social.type === 'twitter' && <TwitterIcon className="svg" />}
-                  </a>
-                ))}
-                
-                {/* Street View Button */}
-                {isStreetViewAvailable && coordinates && (
-                  <div className="social-button" onClick={(e) => e.stopPropagation()}>
-                    <StreetViewButton
-                      position={coordinates}
-                      businessName={t(business.nameKey)}
-                      address={`${business.address.street}, ${business.address.city}`}
-                      size="sm"
-                      variant="outline"
-                      showLabel={false}
-                      className="!p-2 !border-none hover:!bg-transparent"
-                    />
-                  </div>
-                )}
+        <article className="parent u-card" onClick={() => navigate(Page.BusinessProfile, business.id)}>
+          <div className="card">
+            <div className="glass u-media">
+              <div className="logo">
+                <span className="circle circle1"></span>
+                <span className="circle circle2"></span>
+                <span className="circle circle3"></span>
+                <span className="circle circle4"></span>
+                <span className="circle circle5">
+                  UI
+                </span>
               </div>
-              <div className="view-more">
-                <button className="view-more-button" onClick={handleViewMore}>
-                  {t('view_profile')}
-                </button>
-                 <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+            </div>
+            <div className="content u-body">
+              <h3 className="title line-clamp-2">{t(business.nameKey)}</h3>
+              <p className="text line-clamp-3">{t(business.descriptionKey)}</p>
+              <div className="bottom mt-auto">
+                <div className="social-buttons-container">
+                  {socials.slice(0, 2).map((social) => (
+                    <a
+                      key={social.type}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-button"
+                      aria-label={social.type}
+                      onClick={(e) => e.stopPropagation()}
+                      data-abs="off"
+                    >
+                       {social.type === 'website' && <GlobeAltIcon className="svg" />}
+                       {social.type === 'instagram' && <InstagramIcon className="svg" />}
+                       {social.type === 'facebook' && <FacebookIcon className="svg" />}
+                       {social.type === 'twitter' && <TwitterIcon className="svg" />}
+                    </a>
+                  ))}
+                  
+                  {/* Street View Button */}
+                  {isStreetViewAvailable && coordinates && (
+                    <div className="social-button" onClick={(e) => e.stopPropagation()} data-abs="off">
+                      <StreetViewButton
+                        position={coordinates}
+                        businessName={t(business.nameKey)}
+                        address={`${business.address.street}, ${business.address.city}`}
+                        size="sm"
+                        variant="outline"
+                        showLabel={false}
+                        className="!p-2 !border-none hover:!bg-transparent"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="view-more">
+                  <button className="view-more-button" onClick={handleViewMore}>
+                    {t('view_profile')}
+                  </button>
+                   <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </article>
     );
 };
 
@@ -153,7 +155,9 @@ const BusinessesPage: React.FC = () => {
             case FetchStatus.Loading:
             case FetchStatus.Idle:
                 return Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="parent"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>
+                    <div key={index} className="parent">                return (
+                    <div key={index} className="parent u-card"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>
+                );</div>
                 ));
             case FetchStatus.Error:
                 return <ErrorDisplay message={error?.message || 'Unknown error'} onRetry={refetch} />;
@@ -168,7 +172,7 @@ const BusinessesPage: React.FC = () => {
     };
 
     return (
-        <div className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="safe-main mx-auto max-w-7xl px-4 py-6">
             <header className="mb-8">
                 <h1 className="text-4xl font-extrabold text-[var(--text-primary)] text-center">Ontdek bedrijven</h1>
                 <p className="text-[var(--text-secondary)] text-center mt-2">Vind lokale bedrijven in jouw stad</p>
@@ -216,7 +220,7 @@ const BusinessesPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-rows:1fr]">
                 {renderContent()}
             </div>
         </div>

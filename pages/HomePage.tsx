@@ -31,20 +31,20 @@ const HomePage: React.FC = () => {
     }, [fullTitle]);
 
     return (
-        <div className="flex-grow flex items-center justify-center text-center relative overflow-hidden">
-            <div className="relative z-10 p-8">
-                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br from-white to-gray-400 animate-fade-in-down min-h-[96px] md:min-h-[168px]">
+        <div className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 pt-16">
+            <div className="relative z-10 max-w-4xl mx-auto">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-[var(--text-primary)] animate-fade-in-down min-h-[60px] md:min-h-[120px] lg:min-h-[168px]">
                     {title}
-                    <span className="animate-ping">_</span>
+                    <span className="animate-ping text-[var(--primary)]">_</span>
                 </h1>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-300 animate-fade-in-up">
+                <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-[var(--text-secondary)] animate-fade-in-up">
                     {t('home_hero_subtitle')}
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up animation-delay-300">
-                    <button onClick={() => navigate(Page.Discover)} className="px-8 py-3 font-bold text-[var(--primary-text)] bg-[var(--primary)] rounded-full hover:opacity-90 transition-all duration-300 transform hover:scale-105">
+                    <button onClick={() => navigate(Page.Discover)} className="w-full sm:w-auto px-8 py-3 font-bold text-[var(--primary-text)] bg-[var(--primary)] rounded-full hover:opacity-90 transition-all duration-300 transform hover:scale-105">
                         {t('home_cta_discover')}
                     </button>
-                    <button onClick={() => navigate(Page.Businesses)} className="px-8 py-3 font-bold text-[var(--text-primary)] bg-white/20 dark:bg-black/30 backdrop-blur-sm border border-white/30 dark:border-black/50 rounded-full hover:bg-white/30 dark:hover:bg-black/40 transition-all duration-300 transform hover:scale-105">
+                    <button onClick={() => navigate(Page.Businesses)} className="w-full sm:w-auto px-8 py-3 font-bold text-[var(--text-primary)] bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-full hover:bg-[var(--glass-bg)]/80 transition-all duration-300 transform hover:scale-105">
                         {t('home_cta_businesses')}
                     </button>
                 </div>

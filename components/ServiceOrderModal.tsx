@@ -67,7 +67,7 @@ const ServiceOrderModal: React.FC<ServiceOrderModalProps> = ({ isOpen, onClose, 
                     <div className="space-y-4">
                         <div>
                             <label className="input-label">{t('service')}</label>
-                            <select value={selectedService.nameKey} onChange={(e) => setSelectedService(services.find(s => s.nameKey === e.target.value) || services[0])} className="input-field">
+                            <select value={selectedService.nameKey} onChange={(e) => setSelectedService(services.find(s => s.nameKey === e.target.value) || services[0])} className="input-field" aria-label="Select service">
                                 {services.map(s => <option key={s.nameKey} value={s.nameKey}>{t(s.nameKey)} ({s.price})</option>)}
                             </select>
                         </div>
@@ -86,7 +86,7 @@ const ServiceOrderModal: React.FC<ServiceOrderModalProps> = ({ isOpen, onClose, 
                      <div>
                         <h3 className="text-lg font-semibold mb-2">{t('upload_brief_files')}</h3>
                         <p className="text-sm text-[var(--text-muted)] mb-4">{t('attach_files_optional')}</p>
-                        <input type="file" multiple onChange={handleFileChange} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)] file:text-[var(--primary-text)] hover:file:bg-opacity-90"/>
+                        <input type="file" multiple onChange={handleFileChange} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)] file:text-[var(--primary-text)] hover:file:bg-opacity-90" aria-label="Upload files" placeholder="Choose files"/>
                         {files.length > 0 && (
                             <div className="mt-4">
                                 <h4 className="font-semibold text-sm">{t('attached_files')}:</h4>
@@ -119,7 +119,7 @@ const ServiceOrderModal: React.FC<ServiceOrderModalProps> = ({ isOpen, onClose, 
             <div className="bg-[#0c1d2e] border border-purple-800/50 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-slide-up-fast" onClick={e => e.stopPropagation()}>
                 <header className="p-4 flex justify-between items-center border-b border-[var(--border-color-alt)]">
                     <h2 className="text-xl font-bold text-white">{t('order_service')}: <span className="text-purple-300">{t(serviceCategory)}</span></h2>
-                    <button onClick={onClose}><XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" /></button>
+                    <button onClick={onClose} aria-label="Close modal"><XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" /></button>
                 </header>
                 
                 {status === 'success' ? (

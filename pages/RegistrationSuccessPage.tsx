@@ -34,7 +34,7 @@ const RegistrationSuccessPage: React.FC = () => {
                         <span className="circle circle3"></span>
                     </div>
                     <div className="glass"></div>
-                    <div className="content text-center" style={{ transform: 'translateZ(50px)' }}>
+                    <div className="content text-center translate-z-50">
                          <div className="w-20 h-20 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-6">
                             <svg className="w-10 h-10 text-[var(--primary-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -44,7 +44,7 @@ const RegistrationSuccessPage: React.FC = () => {
                         <p className="text-md text-gray-400">{t('welcome_to_platform')}</p>
                     </div>
 
-                    <div className="bottom p-0" style={{ transform: 'translateZ(50px)' }}>
+                    <div className="bottom p-0 translate-z-50">
                         <div className="bg-black/40 border border-gray-800/70 rounded-lg p-6 w-full mt-4">
                             <SparklesIcon className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
                             <h2 className="text-lg font-bold text-yellow-400 mb-1">{t('starter_pack_offer')}</h2>

@@ -159,7 +159,7 @@ const getMethodName = (methodId) => {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5177', 'http://127.0.0.1:5177'],
   credentials: true
 }));
 app.use(express.json());
@@ -1010,7 +1010,7 @@ app.listen(PORT, '127.0.0.1', (err) => {
   
   console.log(`🎯 ENHANCED BACKEND URUCHOMIONY!`);
   console.log(`📡 Server: http://127.0.0.1:${PORT}`);
-  console.log(`🌐 CORS: http://localhost:3000`);
+  console.log(`🌐 CORS: http://localhost:3000, http://localhost:5173, http://localhost:5177`);
   console.log(`✅ Enhanced backend running on port ${PORT}`);
   console.log(`🕒 Started at: ${new Date().toLocaleString('pl-PL')}`);
   console.log(`💾 Mock database ready (${businesses.length} businesses, ${users.length} users)`);

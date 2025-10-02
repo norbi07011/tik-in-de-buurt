@@ -144,7 +144,7 @@ const BusinessProfilePage: React.FC<{ businessId: number }> = ({ businessId }) =
     }
 
     const { business, reviews, ads, gallery, posts } = data;
-    const isOwner = user?.businessId === business.id;
+    const isOwner = String(user?.businessId) === String(business.id);
     const isProfileActive = business.subscriptionStatus === 'active';
 
     const tabs: {id: Tab, label: string}[] = [

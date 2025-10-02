@@ -1,3 +1,4 @@
+const BUILDID = 'AU-2025-10-02-VER-2'; console.log('[BUILDID]', BUILDID, 'App.tsx');
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -115,10 +116,10 @@ const Header: React.FC<{ onMenuClick: () => void; currentUser: any }> = ({ onMen
             </div>
             
             {/* Center Nav (Desktop) */}
-            <div className="hidden md:flex flex-grow items-center justify-center">
-              <nav className="flex items-center space-x-1 lg:space-x-2">
+            <div className="hidden md:flex flex-1 items-center justify-center">
+              <nav className="flex items-center justify-center space-x-1 lg:space-x-2 overflow-x-auto scrollbar-hide">
                 {navItems.map(item => (
-                  <NavLink key={item.page} page={item.page}>{item.label}</NavLink>
+                  <NavLink key={item.page} page={item.page} className="whitespace-nowrap flex-shrink-0">{item.label}</NavLink>
                 ))}
               </nav>
             </div>
@@ -214,8 +215,37 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const initializeFromHash = () => {
       const hash = window.location.hash.slice(1); // Remove #
-      if (hash === 'openstreetmap-demo') {
-        navigate(Page.OpenStreetMapDemo);
+      
+      // Map URL hashes to pages
+      const hashToPageMap: Record<string, Page> = {
+        'home': Page.Home,
+        'discover': Page.Discover,
+        'deals': Page.Deals,
+        'businesses': Page.Businesses,
+        'real_estate': Page.RealEstate,
+        'jobs': Page.Jobs,
+        'careers': Page.Jobs, // Map careers to Jobs page
+        'wall': Page.Wall,
+        'auth': Page.Auth,
+        'login': Page.Auth, // Map login to Auth page
+        'register': Page.Auth, // Map register to Auth page
+        'settings': Page.Settings,
+        'saved': Page.Saved,
+        'dashboard': Page.Dashboard,
+        'support': Page.Support,
+        'openstreetmap-demo': Page.OpenStreetMapDemo,
+        'advanced-features': Page.AdvancedFeaturesDemo,
+        'search': Page.Search,
+        'payment': Page.Payment,
+        'geolocation': Page.Geolocation,
+      };
+      
+      const targetPage = hashToPageMap[hash];
+      if (targetPage) {
+        navigate(targetPage);
+      } else if (hash && !targetPage) {
+        // If hash exists but doesn't match any route, go to home
+        navigate(Page.Home);
       }
     };
     
@@ -248,7 +278,8 @@ const AppContent: React.FC = () => {
             return <HomePage />;
         case Page.Dashboard:
             return (
-                <ProtectedRoute requireAuth={true} requireBusiness={true}>
+                <ProtectedRoute requireAuth={true} requireBusiness={false}>
+                    {/* TODO: Re-enable requireBusiness={true} after verifying business object from backend */}
                     <DashboardPage />
                 </ProtectedRoute>
             );
@@ -305,13 +336,13 @@ const AppContent: React.FC = () => {
         case Page.SubscriptionSuccess:
             return isBusinessUser ? <SubscriptionSuccessPage /> : <HomePage />;
         case Page.Reviews:
-            return isBusinessUser ? <ReviewsPage businessId={user.businessId!} /> : <HomePage />;
+            return isBusinessUser ? <ReviewsPage businessId={parseInt(user.businessId!, 10)} /> : <HomePage />;
         case Page.Support:
             return <SupportPage />;
         case Page.MarketingServices:
             return isBusinessUser ? <NorbsServicePage /> : <HomePage />;
         case Page.EditFreelancerCV:
-            return isFreelancerUser ? <EditFreelancerCVPage freelancerId={user.freelancerId!} /> : <HomePage />;
+            return isFreelancerUser ? <EditFreelancerCVPage freelancerId={parseInt(user.freelancerId!, 10)} /> : <HomePage />;
         case Page.OpenStreetMapDemo:
             return <OpenStreetMapDemo />;
         case Page.AdvancedFeaturesDemo:
@@ -332,10 +363,10 @@ const AppContent: React.FC = () => {
       <div className="animated-dots-bg" />
       <LoadingBar />
       <Toast />
-      <div className="min-h-screen flex flex-col bg-transparent relative">
+      <div className="min-h-screen w-full flex flex-col relative">
         {currentUser && <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
         <Header onMenuClick={() => setIsSidebarOpen(true)} currentUser={currentUser} />
-        <main className={`flex-grow pt-16 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'main-with-sidebar' : ''} ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <main className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'main-with-sidebar' : ''} ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
           {renderPage()}
         </main>
       </div>

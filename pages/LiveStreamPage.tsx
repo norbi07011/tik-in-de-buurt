@@ -289,7 +289,13 @@ const LiveStreamPage: React.FC = () => {
                          </div>
                          <form onSubmit={handleSendChatMessage} className="mt-4 flex gap-2">
                              <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder={t('send_a_message')} className="input-field flex-1" disabled={!isStreaming} />
-                             <button type="submit" className="btn-primary p-3" disabled={!isStreaming || !chatInput.trim()}>
+                             <button 
+                                type="submit" 
+                                className="btn-primary p-3" 
+                                disabled={!isStreaming || !chatInput.trim()}
+                                title="Send chat message"
+                                aria-label="Send chat message"
+                             >
                                 <PaperAirplaneIcon className="w-5 h-5"/>
                              </button>
                          </form>

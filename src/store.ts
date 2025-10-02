@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Page, User } from './types';
+import { Page } from './types';
+import { User } from './types/user';
 
 interface AppState {
     // Navigation
@@ -84,6 +85,47 @@ export const useStore = create<AppState>((set, get) => ({
     // Actions
     navigate: (page, id = null, userId = null) => {
         window.scrollTo(0, 0);
+        
+        // Update URL hash to match the page
+        const pageToHashMap: Record<Page, string> = {
+            [Page.Home]: 'home',
+            [Page.Discover]: 'discover',
+            [Page.Deals]: 'deals',
+            [Page.Businesses]: 'businesses',
+            [Page.RealEstate]: 'real_estate',
+            [Page.Jobs]: 'jobs',
+            [Page.Wall]: 'wall',
+            [Page.FreelancerProfile]: 'freelancer_profile',
+            [Page.PropertyListing]: 'property_listing',
+            [Page.AddAd]: 'add_ad',
+            [Page.BusinessProfile]: 'business_profile',
+            [Page.UserProfile]: 'user_profile',
+            [Page.Auth]: 'auth',
+            [Page.ResetPassword]: 'reset_password',
+            [Page.LiveStream]: 'live_stream',
+            [Page.Settings]: 'settings',
+            [Page.Saved]: 'saved',
+            [Page.Account]: 'account',
+            [Page.SubscriptionSuccess]: 'subscription_success',
+            [Page.Dashboard]: 'dashboard',
+            [Page.Reviews]: 'reviews',
+            [Page.Support]: 'support',
+            [Page.MarketingServices]: 'marketing_services',
+            [Page.RegistrationSuccess]: 'registration_success',
+            [Page.EditFreelancerCV]: 'edit_freelancer_cv',
+            [Page.BusinessRegistration]: 'business_registration',
+            [Page.OpenStreetMapDemo]: 'openstreetmap-demo',
+            [Page.AdvancedFeaturesDemo]: 'advanced-features',
+            [Page.Search]: 'search',
+            [Page.Payment]: 'payment',
+            [Page.Geolocation]: 'geolocation',
+        };
+        
+        const hash = pageToHashMap[page];
+        if (hash) {
+            window.location.hash = hash;
+        }
+        
         const newState: Partial<AppState> = { 
             currentPage: page, 
             activeBusinessId: null, 

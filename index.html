@@ -50,8 +50,8 @@
         --card-bg: #ffffff;
         --input-bg: #ffffff;
         
-        --glass-bg: rgba(255, 255, 255, 0.5);
-        --glass-border: rgba(209, 213, 219, 0.7);
+        --glass-bg: rgba(100, 116, 139, 0.85);
+        --glass-border: rgba(71, 85, 105, 0.5);
         --glow-shadow: 0 10px 30px -15px color-mix(in srgb, var(--primary) 20%, transparent);
       }
 
@@ -67,6 +67,7 @@
         opacity: 0;
         transform: translateY(30px);
         transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        transition-delay: var(--delay, 0ms);
       }
       .scroll-animate.is-visible {
         opacity: 1;
@@ -187,6 +188,15 @@
       }
       html.light .glass-card-divider {
         border-color: rgba(5, 199, 154, 0.3) !important;
+      }
+
+      /* Scrollbar hide utility */
+      .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;     /* Firefox */
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;             /* Chrome, Safari and Opera */
       }
 
 
@@ -698,11 +708,19 @@
       .btn-secondary:hover { background-color: #4B5563; }
       .disabled\\:opacity-50:disabled { opacity: 0.5; cursor: not-allowed; }
 
-      /* Uiverse 3D Card Styles - REBUILT based on new design */
-      .parent {
+      /* Uiverse 3D Card Styles - SCOPED TO CARDS ONLY */
+      .u-card .parent {
         width: 100%;
-        min-height: 420px;
+        min-height: 280px; /* FIXED: Reduced from 420px */
         perspective: 1000px;
+      }
+
+      /* Responsive card heights - SCOPED TO CARDS ONLY */
+      @media (max-width: 640px) {
+        .u-card .parent { min-height: 320px; }
+      }
+      @media (min-width: 1024px) {
+        .u-card .parent { min-height: 260px; }
       }
 
       .card {
@@ -726,7 +744,7 @@
           border: 1px solid rgba(5, 199, 154, 0.2);
       }
 
-      .parent:hover .card {
+      .u-card .parent:hover .card {
         transform: rotateY(10deg) rotateX(-10deg) scale(1.05);
         box-shadow: 0 40px 50px -20px rgba(0, 245, 201, 0.3);
       }
@@ -750,7 +768,7 @@
         border: 1px solid rgba(0, 0, 0, 0.1);
       }
 
-      .parent:hover .glass {
+      .u-card .parent:hover .glass {
         transform: translateZ(50px) scale(0.95);
         -webkit-backdrop-filter: blur(20px);
         backdrop-filter: blur(20px);
@@ -778,22 +796,22 @@
           text-shadow: 0 0 10px rgba(5, 199, 154, 0.5);
       }
 
-      .content .text {
+      .u-card .content .text {
         margin-top: 0.75rem;
         color: #e5e7eb;
         font-size: 0.875rem;
         line-height: 1.5;
-        height: 100px;
+        height: 60px; /* FIXED: Reduced from 100px */
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
         display: block;
-        -webkit-line-clamp: 5;
-        line-clamp: 5;
+        -webkit-line-clamp: 3; /* FIXED: Reduced from 5 */
+        line-clamp: 3;
         -webkit-box-orient: vertical;
       }
       
-      html.light .content .text {
+      html.light .u-card .content .text {
           color: var(--text-secondary);
       }
 
@@ -936,11 +954,11 @@
 
       .logo .circle5 .svg-logo { display: none; }
 
-      .parent:hover .logo .circle1 { transform: translateZ(-10px) translateY(20px) translateX(20px); opacity: 0.4; }
-      .parent:hover .logo .circle2 { transform: translateZ(-20px) translateY(10px) translateX(-15px); opacity: 0.5; }
-      .parent:hover .logo .circle3 { transform: translateZ(-40px) translateY(-10px) translateX(10px); opacity: 0.6; }
-      .parent:hover .logo .circle4 { transform: translateZ(100px); }
-      .parent:hover .logo .circle5 { transform: translateZ(120px); }
+      .u-card .parent:hover .logo .circle1 { transform: translateZ(-10px) translateY(20px) translateX(20px); opacity: 0.4; }
+      .u-card .parent:hover .logo .circle2 { transform: translateZ(-20px) translateY(10px) translateX(-15px); opacity: 0.5; }
+      .u-card .parent:hover .logo .circle3 { transform: translateZ(-40px) translateY(-10px) translateX(10px); opacity: 0.6; }
+      .u-card .parent:hover .logo .circle4 { transform: translateZ(100px); }
+      .u-card .parent:hover .logo .circle5 { transform: translateZ(120px); }
 
 
       /* NEW: Animated, Rotating Search Bar */
@@ -1055,7 +1073,7 @@
           position: fixed;
           inset: 0;
           z-index: -10;
-          background-color: #050508;
+          background-color: var(--background);
           --dot-gap: 25px;
           background-image: 
               radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -1064,6 +1082,13 @@
           background-position: 0 0, calc(var(--dot-gap)/2) calc(var(--dot-gap)/2);
           overflow: hidden;
       }
+      
+      /* Light mode dots */
+      html.light .animated-dots-bg {
+          background-image: 
+              radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+              radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      }
 
       .animated-dots-bg::after {
           content: '';
@@ -1071,9 +1096,9 @@
           inset: -200%;
           width: 400%;
           height: 400%;
-          background-image: conic-gradient(from 90deg at 20% 25%, #00aaff, #050508 10%, transparent 30%, #00aaff 50%);
+          background-image: conic-gradient(from 90deg at 20% 25%, var(--primary), transparent 10%, transparent 30%, var(--primary) 50%);
           animation: wave 15s linear infinite;
-          opacity: 0.3;
+          opacity: 0.2;
       }
 
       .animated-dots-bg::before {
@@ -1082,10 +1107,10 @@
           inset: -200%;
           width: 400%;
           height: 400%;
-          background-image: conic-gradient(from 180deg at 80% 70%, #00aaff, #050508 15%, transparent 40%, #00aaff 60%);
+          background-image: conic-gradient(from 180deg at 80% 70%, var(--primary), transparent 15%, transparent 40%, var(--primary) 60%);
           animation: wave 20s linear infinite;
           animation-delay: -5s;
-          opacity: 0.3;
+          opacity: 0.2;
       }
 
       @keyframes wave {
@@ -1645,6 +1670,11 @@
           transform: scale(0.8);
           transform-origin: right;
         }
+      }
+
+      /* Utility class for 3D transform */
+      .translate-z-50 {
+        transform: translateZ(50px);
       }
 
     </style>

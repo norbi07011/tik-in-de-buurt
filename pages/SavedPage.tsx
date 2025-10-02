@@ -51,7 +51,8 @@ const ScrollAnimationWrapper: React.FC<{ children: React.ReactNode, delay?: numb
     }, []);
 
     return (
-        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''}`} style={{ transitionDelay: `${delay}ms` }}>
+        /* eslint-disable-next-line no-inline-styles */
+        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''}`} style={{['--delay' as any]: `${delay}ms`}}>
             {children}
         </div>
     );

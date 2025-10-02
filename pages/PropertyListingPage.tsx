@@ -36,7 +36,14 @@ const EditableDetailItem: React.FC<{ icon?: React.ReactNode; label: string; valu
             <div className="flex-1 flex justify-between items-center">
                 <span className="text-[var(--text-secondary)] text-sm">{label}</span>
                 {isEditing ? (
-                    children || <input type={type} value={value as string || ''} onChange={handleChange} className="w-1/2 text-right bg-transparent text-[var(--text-primary)] font-semibold border-b border-dashed border-[var(--border-color)] focus:outline-none focus:border-[var(--primary)]" />
+                    children || <input 
+                        type={type} 
+                        value={value as string || ''} 
+                        onChange={handleChange} 
+                        aria-label={`Edit ${label}`}
+                        placeholder={`Enter ${label.toLowerCase()}`}
+                        className="w-1/2 text-right bg-transparent text-[var(--text-primary)] font-semibold border-b border-dashed border-[var(--border-color)] focus:outline-none focus:border-[var(--primary)]" 
+                    />
                 ) : (
                     <span className="text-[var(--text-primary)] font-semibold text-right">{value}</span>
                 )}
@@ -89,7 +96,7 @@ const PropertyListingPage: React.FC<{ propertyId: number }> = ({ propertyId }) =
     const [editedListing, setEditedListing] = useState<PropertyListing | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     
-    const isOwner = user && agent && user.businessId === agent.id;
+    const isOwner = user && agent && String(user.businessId) === String(agent.id);
 
     const fetchData = useCallback(async (id: number) => {
         setStatus(FetchStatus.Loading);
@@ -165,7 +172,14 @@ const PropertyListingPage: React.FC<{ propertyId: number }> = ({ propertyId }) =
                         <div className="glass-card-style p-6">
                             <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">{t('description')}</h3>
                             {isEditing ? (
-                                <textarea value={editedListing.description} onChange={(e) => handleUpdate('description', e.target.value)} rows={6} className="w-full bg-transparent text-[var(--text-secondary)] leading-relaxed whitespace-pre-line border border-dashed border-[var(--border-color)] focus:outline-none focus:border-[var(--primary)] p-2 rounded" />
+                                                                <textarea 
+                                    value={editedListing.description} 
+                                    onChange={(e) => handleUpdate('description', e.target.value)} 
+                                    rows={6} 
+                                    aria-label="Property description"
+                                    placeholder="Enter property description"
+                                    className="w-full bg-transparent text-[var(--text-secondary)] border border-[var(--border-color)] rounded-md p-3 focus:outline-none focus:border-[var(--primary)] resize-vertical" 
+                                />
                             ) : (
                                 <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">{listing.description}</p>
                             )}

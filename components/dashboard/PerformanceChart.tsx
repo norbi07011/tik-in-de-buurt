@@ -27,7 +27,8 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
             <div className="bg-black/70 backdrop-blur-sm border border-white/20 p-4 rounded-lg">
                 <p className="label font-bold text-white">{`${label}`}</p>
                 {payload.map((pld: any) => (
-                    <p key={pld.dataKey} style={{ color: pld.color }}>
+                    /* eslint-disable-next-line no-inline-styles */
+                    <p key={pld.dataKey} className="font-medium" style={{color: pld.color}}>
                         {`${t(pld.dataKey)}: ${pld.value}`}
                     </p>
                 ))}

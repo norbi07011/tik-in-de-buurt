@@ -1,13 +1,30 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
+const USE_MOCK = process.env.USE_MOCK_DATABASE === 'true';
+
+console.log(`🔧 Server starting in ${USE_MOCK ? 'MOCK' : 'REAL'} mode`);
+
+// Enhanced error handling
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
+  origin: process.env.FRONTEND_URL || 'http://localhost:5178',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,12 +54,27 @@ app.post('/api/auth/register', (req, res) => {
 });
 
 app.post('/api/auth/login', (req, res) => {
-  console.log('🔐 Mock login request');
+  console.log('🔐 Mock login request:', req.body);
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and password are required'
+    });
+  }
+  
+  // Mock successful login with stringified IDs
   res.json({
     success: true,
     message: 'Mock login successful',
     token: 'mock-jwt-token-123',
-    user: { id: 1, email: req.body.email }
+    user: { 
+      _id: String(1), 
+      name: 'Mock User',
+      email: email,
+      businessId: String(2)
+    }
   });
 });
 
@@ -255,11 +287,32 @@ app.post('/api/auth/register/business', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, '127.0.0.1', () => {
+const server = app.listen(PORT, () => {
   console.log(`🎯 QUICK BACKEND URUCHOMIONY!`);
-  console.log(`📡 Server: http://127.0.0.1:${PORT}`);
-  console.log(`🌐 CORS: http://localhost:3000`);
+  console.log(`📡 Server: http://localhost:${PORT}`);
+  console.log(`🌐 CORS: http://localhost:3000, http://localhost:5173, http://localhost:5177, http://localhost:5178`);
   console.log(`✅ Quick backend running on port ${PORT}`);
   console.log(`🕒 Started at: ${new Date().toLocaleString('pl-PL')}`);
   console.log(`💾 Mock database ready (${businesses.length} businesses, ${users.length} users)`);
+});
+
+server.on('error', (err) => {
+  console.error('❌ Server error:', err);
+});
+
+// Keep process alive
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('🔒 Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('👋 SIGINT received (Ctrl+C), shutting down gracefully');
+  server.close(() => {
+    console.log('🔒 Server closed');
+    process.exit(0);
+  });
 });

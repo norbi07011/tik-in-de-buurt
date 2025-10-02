@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { IUser } from '../src/types';
+import type { User } from '../src/types/user';
 import { 
     XMarkIcon, 
     CameraIcon, 
@@ -16,10 +16,10 @@ import {
 import { api } from '../src/api';
 
 interface EditProfileModalProps {
-    user: IUser;
+    user: User;
     isOpen: boolean;
     onClose: () => void;
-    onUserUpdate: (updatedUser: IUser) => void;
+    onUserUpdate: (updatedUser: User) => void;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
@@ -30,7 +30,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 }) => {
     const { t } = useTranslation();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<Partial<IUser>>({
+    const [formData, setFormData] = useState<Partial<User>>({
         name: user.name,
         firstName: user.firstName || '',
         lastName: user.lastName || '',

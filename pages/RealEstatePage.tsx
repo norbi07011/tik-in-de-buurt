@@ -22,49 +22,49 @@ const UiversePropertyCard: React.FC<{ listing: PropertyListing }> = ({ listing }
     };
 
     return (
-        <div className="parent">
-          <div className="card" onClick={() => navigate(Page.PropertyListing, listing.id)}>
-            <div className="logo">
-              <span className="circle circle1"></span>
-              <span className="circle circle2"></span>
-              <span className="circle circle3"></span>
-              <span className="circle circle4"></span>
-              <span className="circle circle5 !text-xs !px-1 !leading-tight !flex !items-center !justify-center">
-                {formatPrice(listing.price)}
-              </span>
-            </div>
-            <div className="glass" style={{
-                backgroundImage: `url(${listing.photos[0]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-            }}>
+        <article className="parent u-card" onClick={() => navigate(Page.PropertyListing, listing.id)}>
+          <div className="card">
+            {/* eslint-disable-next-line no-inline-styles */}
+            <div 
+                className="glass u-media property-media-bg" 
+                style={{backgroundImage: `url(${listing.photos[0]})`}}
+            >
                 <div className="absolute inset-0 bg-black/60"></div>
+                <div className="logo">
+                  <span className="circle circle1"></span>
+                  <span className="circle circle2"></span>
+                  <span className="circle circle3"></span>
+                  <span className="circle circle4"></span>
+                  <span className="circle circle5 !text-xs !px-1 !leading-tight !flex !items-center !justify-center">
+                    {formatPrice(listing.price)}
+                  </span>
+                </div>
             </div>
-            <div className="content">
-              <h3 className="title">{listing.title}</h3>
-              <p className="text !h-auto">{listing.address.street}, {listing.address.city}</p>
-            </div>
-            <div className="bottom">
-              <div className="social-buttons-container">
-                <div className="flex items-center gap-1.5 text-xs text-white">
-                    <BedIcon className="w-4 h-4 text-white"/>{listing.bedrooms}
+            <div className="content u-body">
+              <h3 className="title line-clamp-2">{listing.title}</h3>
+              <p className="text !h-auto line-clamp-2">{listing.address.street}, {listing.address.city}</p>
+              <div className="bottom mt-auto">
+                <div className="social-buttons-container">
+                  <div className="flex items-center gap-1.5 text-xs text-white" data-abs="off">
+                      <BedIcon className="w-4 h-4 text-white"/>{listing.bedrooms}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-white" data-abs="off">
+                      <ShowerIcon className="w-4 h-4 text-white"/>{listing.bathrooms}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-white" data-abs="off">
+                      <ArrowsPointingOutIcon className="w-4 h-4 text-white"/>{listing.livingArea} m²
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-white">
-                    <ShowerIcon className="w-4 h-4 text-white"/>{listing.bathrooms}
+                <div className="view-more">
+                  <button className="view-more-button" onClick={handleViewMore}>
+                    {t('view_profile')}
+                  </button>
+                   <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-white">
-                    <ArrowsPointingOutIcon className="w-4 h-4 text-white"/>{listing.livingArea} m²
-                </div>
-              </div>
-              <div className="view-more">
-                <button className="view-more-button" onClick={handleViewMore}>
-                  {t('view_profile')}
-                </button>
-                 <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
               </div>
             </div>
           </div>
-        </div>
+        </article>
     );
 };
 
@@ -90,7 +90,7 @@ const ScrollAnimationWrapper: React.FC<{ children: React.ReactNode, delay?: numb
     }, []);
 
     return (
-        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''}`} style={{ transitionDelay: `${delay}ms` }}>
+        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''} scroll-animate-delay-${delay}`}>
             {children}
         </div>
     );
@@ -146,14 +146,14 @@ const RealEstatePage: React.FC = () => {
         switch (status) {
             case FetchStatus.Loading:
             case FetchStatus.Idle:
-                return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="parent"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>)}</div>;
+                return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-rows:1fr]">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="parent u-card"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>)}</div>;
             case FetchStatus.Error:
                 return <ErrorDisplay message={error?.message || 'Unknown error'} onRetry={refetch} />;
             case FetchStatus.Success:
                 if (!listings || listings.length === 0) {
                     return <div className="col-span-full text-center text-[var(--text-secondary)] py-10">{t('no_properties_found')}</div>;
                 }
-                return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">{listings.map((listing, index) => (
+                return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-rows:1fr]">{listings.map((listing, index) => (
                     <UiversePropertyCard key={listing.id} listing={listing} />
                 ))}</div>;
         }
@@ -167,7 +167,7 @@ const RealEstatePage: React.FC = () => {
                         <UiversePropertyCard listing={listing} />
                     </div>
                 ))}
-                {(status === FetchStatus.Loading || status === FetchStatus.Idle) && Array.from({ length: 3 }).map((_, i) => <div key={i} className="parent"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>)}
+                {(status === FetchStatus.Loading || status === FetchStatus.Idle) && Array.from({ length: 3 }).map((_, i) => <div key={i} className="parent u-card"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>)}
             </div>
             <div className="lg:col-span-3 h-full rounded-lg overflow-hidden">
                 {listings && listings.length > 0 && <BusinessMap address={listings[0].address} />}
@@ -176,7 +176,7 @@ const RealEstatePage: React.FC = () => {
     );
     
     return (
-        <div className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="safe-main mx-auto max-w-7xl px-4 py-6">
             <header className="mb-8 text-center">
                 <h1 className="text-4xl font-extrabold text-[var(--text-primary)]">{t('find_your_next_home')}</h1>
             </header>
@@ -214,9 +214,42 @@ const RealEstatePage: React.FC = () => {
                     </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <select name="status" value={filters.status || ''} onChange={handleInputChange} className="input-filter"><option value="">{t('property_status')}</option><option value={PropertyStatus.ForSale}>{t('for_sale')}</option><option value={PropertyStatus.ForRent}>{t('for_rent')}</option></select>
-                    <select name="type" value={filters.type || ''} onChange={handleInputChange} className="input-filter"><option value="">{t('property_type')}</option><option value={PropertyType.House}>{t('house')}</option><option value={PropertyType.Apartment}>{t('apartment')}</option></select>
-                    <select name="bedrooms" value={filters.bedrooms} onChange={handleInputChange} className="input-filter"><option value="">{t('bedrooms')}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select>
+                                        <select 
+                        name="status" 
+                        value={filters.status || ''} 
+                        onChange={handleInputChange} 
+                        aria-label="Property status filter"
+                        className="input-filter"
+                    >
+                        <option value="">{t('property_status')}</option>
+                        <option value={PropertyStatus.ForSale}>{t('for_sale')}</option>
+                        <option value={PropertyStatus.ForRent}>{t('for_rent')}</option>
+                    </select>
+                    <select 
+                        name="type" 
+                        value={filters.type || ''} 
+                        onChange={handleInputChange} 
+                        aria-label="Property type filter"
+                        className="input-filter"
+                    >
+                        <option value="">{t('property_type')}</option>
+                        <option value={PropertyType.House}>{t('house')}</option>
+                        <option value={PropertyType.Apartment}>{t('apartment')}</option>
+                    </select>
+                                        <select 
+                        name="bedrooms" 
+                        value={filters.bedrooms} 
+                        onChange={handleInputChange} 
+                        aria-label="Number of bedrooms filter"
+                        className="input-filter"
+                    >
+                        <option value="">{t('bedrooms')}</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                        <option value="5">5+</option>
+                    </select>
                     <div className="flex items-center gap-2">
                         <input name="priceMin" type="number" placeholder="Min Price" value={filters.priceMin} onChange={handleInputChange} className="input-filter" />
                         <span>-</span>

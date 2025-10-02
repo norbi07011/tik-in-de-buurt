@@ -18,35 +18,36 @@ const UiverseFreelancerCard: React.FC<{ freelancer: Freelancer }> = ({ freelance
     };
 
     return (
-        <div className="parent">
-          <div className="card" onClick={() => navigate(Page.FreelancerProfile, freelancer.id)}>
-            <div className="logo">
-              <span className="circle circle1"></span>
-              <span className="circle circle2"></span>
-              <span className="circle circle3"></span>
-              <span className="circle circle4"></span>
-              <span className="circle circle5 !text-lg !flex !items-center !justify-center">
-                <StarIcon className="w-4 h-4 text-black inline-block mr-1" /> {freelancer.rating.toFixed(1)}
-              </span>
+        <article className="parent u-card" onClick={() => navigate(Page.FreelancerProfile, freelancer.id)}>
+          <div className="card">
+            <div className="glass u-media">
+              <div className="logo">
+                <span className="circle circle1"></span>
+                <span className="circle circle2"></span>
+                <span className="circle circle3"></span>
+                <span className="circle circle4"></span>
+                <span className="circle circle5 !text-lg !flex !items-center !justify-center">
+                  <StarIcon className="w-4 h-4 text-black inline-block mr-1" /> {freelancer.rating.toFixed(1)}
+                </span>
+              </div>
             </div>
-            <div className="glass"></div>
-            <div className="content">
-              <h3 className="title">{t(freelancer.nameKey)}</h3>
-              <p className="text !h-auto">{t(freelancer.specializationKey)}</p>
-            </div>
-            <div className="bottom">
-                <div className="social-buttons-container">
-                    {/* Placeholder for potential future social links */}
-                </div>
-                <div className="view-more">
-                    <button className="view-more-button" onClick={handleViewMore}>
-                    {t('view_profile')}
-                    </button>
-                    <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                </div>
+            <div className="content u-body">
+              <h3 className="title line-clamp-2">{t(freelancer.nameKey)}</h3>
+              <p className="text !h-auto line-clamp-3">{t(freelancer.specializationKey)}</p>
+              <div className="bottom mt-auto">
+                  <div className="social-buttons-container">
+                      {/* Placeholder for potential future social links */}
+                  </div>
+                  <div className="view-more">
+                      <button className="view-more-button" onClick={handleViewMore}>
+                      {t('view_profile')}
+                      </button>
+                      <svg className="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                  </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
     );
 };
 
@@ -72,7 +73,7 @@ const ScrollAnimationWrapper: React.FC<{ children: React.ReactNode, delay?: numb
     }, []);
 
     return (
-        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''}`} style={{ transitionDelay: `${delay}ms` }}>
+        <div ref={ref} className={`scroll-animate ${isVisible ? 'is-visible' : ''} scroll-animate-delay-${delay}`}>
             {children}
         </div>
     );
@@ -115,7 +116,7 @@ const JobsPage: React.FC = () => {
         switch (status) {
             case FetchStatus.Loading:
             case FetchStatus.Idle:
-                return Array.from({ length: 6 }).map((_, index) => <div key={index} className="parent"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>);
+                return Array.from({ length: 6 }).map((_, index) => <div key={index} className="parent u-card"><div className="card bg-[var(--border-color-alt)] animate-pulse"></div></div>);
             case FetchStatus.Error:
                 return <ErrorDisplay message={error?.message || 'Unknown error'} onRetry={refetch} />;
             case FetchStatus.Success:
@@ -129,7 +130,7 @@ const JobsPage: React.FC = () => {
     };
 
     return (
-        <div className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="safe-main mx-auto max-w-7xl px-4 py-6">
             <header className="mb-8">
                 <h1 className="text-4xl font-extrabold text-[var(--text-primary)] text-center">{t('find_craftsman_nearby')}</h1>
             </header>
@@ -160,7 +161,12 @@ const JobsPage: React.FC = () => {
                       </div>
                     </div>
                 </div>
-                 <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="w-full md:w-48 bg-[var(--background-alt)] border border-[var(--border-color)] rounded-md py-2 px-4 text-[var(--text-primary)]">
+                 <select 
+                     value={selectedCity} 
+                     onChange={(e) => setSelectedCity(e.target.value)} 
+                     aria-label="Filter jobs by city"
+                     className="w-full md:w-48 bg-[var(--background-alt)] border border-[var(--border-color)] rounded-md py-2 px-4 text-[var(--text-primary)]"
+                 >
                     <option value="">{t('all_cities')}</option>
                     {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -177,7 +183,7 @@ const JobsPage: React.FC = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-rows:1fr]">
                 {renderContent()}
             </div>
         </div>

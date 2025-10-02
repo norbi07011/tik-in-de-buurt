@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Page, FetchStatus } from '../src/types';
-import type { IUser, PostWithBusiness } from '../src/types';
+import type { PostWithBusiness } from '../src/types';
+import { User } from '../src/types/user';
 import { 
     ArrowLeftIcon, 
     UserIcon, 
@@ -25,7 +26,7 @@ interface UserProfilePageProps {
 }
 
 interface UserProfileData {
-    user: IUser;
+    user: User;
     posts: PostWithBusiness[];
     photos: string[];
     videos: string[];
@@ -34,7 +35,7 @@ interface UserProfileData {
 
 // Komponent do wyświetlania avatara z możliwością edycji
 const ProfileAvatar: React.FC<{ 
-    user: IUser; 
+    user: User; 
     isOwnProfile: boolean; 
     onAvatarUpdate: (newAvatar: string) => void;
 }> = ({ user, isOwnProfile, onAvatarUpdate }) => {
@@ -121,7 +122,7 @@ const ProfileAvatar: React.FC<{
 
 // Komponent do wyświetlania cover image z możliwością edycji
 const ProfileCover: React.FC<{ 
-    user: IUser; 
+    user: User; 
     isOwnProfile: boolean; 
     onCoverUpdate: (newCover: string) => void;
 }> = ({ user, isOwnProfile, onCoverUpdate }) => {
@@ -210,7 +211,7 @@ const ProfileCover: React.FC<{
 
 // Komponent do wyświetlania informacji profilu
 const ProfileInfo: React.FC<{ 
-    user: IUser; 
+    user: User; 
     isOwnProfile: boolean; 
     onEdit: () => void;
 }> = ({ user, isOwnProfile, onEdit }) => {
@@ -257,7 +258,7 @@ const ProfileInfo: React.FC<{
                 )}
                 <div className="flex items-center gap-1">
                     <CalendarDaysIcon className="w-4 h-4" />
-                    <span>Dołączył w {new Date(user.createdAt).toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}</span>
+                    <span>Dołączył w {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' }) : 'Niedawno'}</span>
                 </div>
             </div>
 
@@ -313,7 +314,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId }) => {
     const { t } = useTranslation();
     const { navigate, user: currentUser } = useStore();
     const [activeTab, setActiveTab] = useState<'posts' | 'photos' | 'videos'>('posts');
-    const [userProfile, setUserProfile] = useState<IUser | null>(null);
+    const [userProfile, setUserProfile] = useState<User | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const fetcher = useCallback(async (): Promise<UserProfileData> => {
@@ -345,7 +346,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId }) => {
         }
     };
 
-    const handleUserUpdate = (updatedUser: IUser) => {
+    const handleUserUpdate = (updatedUser: User) => {
         setUserProfile(updatedUser);
         setIsEditModalOpen(false);
     };

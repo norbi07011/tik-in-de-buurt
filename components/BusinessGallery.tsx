@@ -17,7 +17,7 @@ const Lightbox: React.FC<{ images: string[], selectedIndex: number, onClose: () 
 
     return (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center animate-fade-in" onClick={onClose}>
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-[110]">
+            <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-[110]" aria-label="Close gallery">
                 <XMarkIcon className="w-10 h-10" />
             </button>
             

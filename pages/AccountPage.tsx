@@ -197,7 +197,7 @@ const AccountPage: React.FC = () => {
         if (user?.id) {
             setStatus(FetchStatus.Loading);
             try {
-                const fetchedBusiness = await api.fetchBusinessByOwnerId(user.id);
+                const fetchedBusiness = await api.fetchBusinessByOwnerId(parseInt(user.id));
                 setBusiness(fetchedBusiness);
                 setStatus(FetchStatus.Success);
             } catch (e) {

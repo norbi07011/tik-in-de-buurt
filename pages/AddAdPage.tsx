@@ -88,7 +88,7 @@ const AddAdPage: React.FC = () => {
             if (user) {
                 setBusinessStatus(FetchStatus.Loading);
                 try {
-                    const business = await api.fetchBusinessByOwnerId(user.id);
+                    const business = await api.fetchBusinessByOwnerId(parseInt(user.id, 10));
                     setUserBusiness(business);
                     setBusinessStatus(FetchStatus.Success);
                 } catch (e) {

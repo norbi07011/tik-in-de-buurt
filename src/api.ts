@@ -1,20 +1,41 @@
 import { MOCK_ADS, MOCK_BUSINESSES, MOCK_REVIEWS, MOCK_GALLERY_IMAGES, MOCK_COMMENTS, MOCK_PROPERTY_LISTINGS, MOCK_FREELANCERS, JOB_CATEGORIES, MOCK_POSTS, MOCK_PLANS, MOCK_INVOICES, MOCK_AD_ANALYTICS } from './constants';
-import type { Ad, AdWithBusiness, Business, User, Category, Review, Comment, PropertyListing, PropertyStatus, PropertyType, Freelancer, Post, PostType, PostWithBusiness, Plan, Invoice, DashboardStats, AdAnalyticsData, CV } from './types';
+import type { Ad, AdWithBusiness, Business, Category, Review, Comment, PropertyListing, PropertyStatus, PropertyType, Freelancer, Post, PostType, PostWithBusiness, Plan, Invoice, DashboardStats, AdAnalyticsData, CV } from './types';
+import type { User } from './types/user';
+import { normalizeUser } from './utils/normalize';
 import i18n from 'i18next';
 import { useStore } from './store';
+import token from './utils/token';
+
+const BUILDID = 'AU-2025-10-02-VER-2';
+console.log('[BUILDID]', BUILDID, 'api.ts');
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'; // Default to false for development
+
+// API URL Helper - ensures /api prefix
+const apiUrl = (path: string): string => {
+  const normalized = path.startsWith('/api') ? path : `/api${path.startsWith('/') ? path : '/' + path}`;
+  const fullUrl = `${API_BASE_URL}${normalized}`;
+  console.log('[API_URL]', { path, normalized, fullUrl });
+  return fullUrl;
+};
+
+// Debug API configuration
+console.log('🔧 API Configuration:', {
+  API_BASE_URL,
+  USE_MOCK_API,
+  VITE_USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API
+});
 
 // In-memory database for simulation
 let users: User[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', businessId: 1 },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', businessId: 2 },
-    { id: 3, name: 'Mario Rossi', email: 'mario@example.com', businessId: 3 },
-    { id: 4, name: 'Anna Bloem', email: 'anna@example.com', businessId: 4 },
-    { id: 5, name: 'Real Estate Agent', email: 'agent@example.com', businessId: 5 },
-    { id: 6, name: 'Tech Fixer', email: 'tech@example.com', businessId: 6 },
+    { _id: '1', id: '1', name: 'John Doe', email: 'john@example.com', businessId: '1' },
+    { _id: '2', id: '2', name: 'Jane Smith', email: 'jane@example.com', businessId: '2' },
+    { _id: '3', id: '3', name: 'Mario Rossi', email: 'mario@example.com', businessId: '3' },
+    { _id: '4', id: '4', name: 'Anna Bloem', email: 'anna@example.com', businessId: '4' },
+    { _id: '5', id: '5', name: 'Real Estate Agent', email: 'agent@example.com', businessId: '5' },
+    { _id: '6', id: '6', name: 'Tech Fixer', email: 'tech@example.com', businessId: '6' },
 ];
 let ads: Ad[] = [...MOCK_ADS];
 let businesses: Business[] = [...MOCK_BUSINESSES];
@@ -60,13 +81,13 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
 
 // Authentication helper
 const getAuthToken = () => {
-  return localStorage.getItem('auth-token');
+  return token.getToken();
 };
 
 const setAuthHeader = (headers: Record<string, string> = {}) => {
-  const token = getAuthToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  const authToken = getAuthToken();
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
   }
   return headers;
 };
@@ -108,11 +129,16 @@ export const api = {
         withFetching(async () => {
             if (USE_MOCK_API) {
                 await networkDelay(1000);
-                const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-                if (!user || password !== 'password123') {
-                    throw new Error('error_invalid_credentials');
-                }
-                return { user, token: 'fake-jwt-token' };
+                // Return consistent stringified IDs for Mock
+                const mockUser = {
+                    _id: String(1),
+                    name: "Mock User",
+                    email: email,
+                    businessId: String(2)
+                };
+                const mockToken = 'mock-token-123';
+                token.setToken(mockToken);
+                return { user: normalizeUser(mockUser), token: mockToken };
             } else {
                 const response = await apiCall('/auth/login', {
                     method: 'POST',
@@ -120,14 +146,12 @@ export const api = {
                 });
                 
                 if (response.token) {
-                    localStorage.setItem('auth-token', response.token);
+                    token.setToken(response.token);
                 }
                 
-                return response;
+                return { user: normalizeUser(response.user), token: response.token };
             }
-        }),
-
-    register: async (name: string, email: string, password: string): Promise<{ user: User, token: string }> => 
+        }),    register: async (name: string, email: string, password: string): Promise<{ user: User, token: string }> => 
         withFetching(async () => {
             if (USE_MOCK_API) {
                 await networkDelay(1500);
@@ -137,7 +161,8 @@ export const api = {
                 if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
                     throw new Error('error_email_in_use');
                 }
-                const newUser: User = { id: nextUserId++, name, email };
+                const rawUser = { id: nextUserId++, name, email };
+                const newUser = normalizeUser(rawUser);
                 users.push(newUser);
                 return { user: newUser, token: 'fake-jwt-token-for-new-user' };
             } else {
@@ -169,11 +194,12 @@ export const api = {
                 }
                 
                 // Create mock user
-                const newUser: User = { 
+                const rawUser = { 
                     id: nextUserId++, 
                     name: data.name, 
                     email: data.email 
                 };
+                const newUser = normalizeUser(rawUser);
                 users.push(newUser);
                 
                 // Create mock business
@@ -219,7 +245,12 @@ export const api = {
                     business: newBusiness
                 };
             } else {
-                const response = await fetch(`${API_BASE_URL}/auth/register/business`, {
+                // 1) API endpoint - zgodność ścieżki
+                const finalURL = apiUrl('/auth/register/business');
+                console.log('📡 [API_REGISTER_BUSINESS] Sending to backend');
+                console.log('📡 [API_REGISTER_BUSINESS] Final URL:', finalURL);
+                
+                const response = await fetch(finalURL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -248,22 +279,61 @@ export const api = {
                     }),
                 });
 
+                console.log('📡 [API] Backend response status:', response.status, response.statusText);
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Business registration failed');
+                    let errorData: any = {};
+                    try {
+                        errorData = await response.json();
+                    } catch (jsonError) {
+                        console.error('🔴 [API] Failed to parse error response as JSON:', jsonError);
+                    }
+                    console.error('🔴🔴🔴 [API] Backend returned error:', errorData);
+                    throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const result = await response.json();
+                let result: any;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('🔴🔴🔴 [API] Failed to parse success response as JSON:', jsonError);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
+                // 2) Zapis tokenu - BEZWARUNKOWO
+                console.log('✅ [API] Backend response:', JSON.stringify(result, null, 2));
                 
                 if (result.token) {
                     localStorage.setItem('auth-token', result.token);
+                    console.log('✅ [API] Token UNCONDITIONALLY saved:', result.token.substring(0, 20) + '...');
+                } else {
+                    console.error('🔴🔴🔴 [API] NO TOKEN in response!');
                 }
                 
+                // Validate structure and return
                 return {
                     user: result.user,
                     token: result.token,
                     business: result.business
                 };
+            }
+        }),
+
+    requestPasswordReset: async (email: string): Promise<{ message: string }> =>
+        withFetching(async () => {
+            if (USE_MOCK_API) {
+                await networkDelay(1000);
+                // Mock validation
+                if (!email) {
+                    throw new Error('Email is required');
+                }
+                return { message: 'If an account with that email exists, we have sent a password reset link.' };
+            } else {
+                const response = await apiCall('/auth/forgot-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ email }),
+                });
+                return response;
             }
         }),
 
@@ -485,9 +555,9 @@ export const api = {
             await networkDelay(700);
             const business = businesses.find(b => b.ownerId === ownerId);
             if (!business) {
-                const user = users.find(u => u.id === ownerId);
+                const user = users.find(u => String(u.id) === String(ownerId));
                 if(user && user.businessId) {
-                    const businessById = businesses.find(b => b.id === user.businessId);
+                    const businessById = businesses.find(b => String(b.id) === String(user.businessId));
                     if (businessById) return businessById;
                 }
                 throw new Error("Business not found for this owner.");
