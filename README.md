@@ -81,3 +81,66 @@ Seed sample data:
 cd backend
 npm run seed
 ```
+
+## 📦 Deploy na Netlify - Kiedy Będziemy Gotowi
+
+**Status**: Repo jest czysty po cleanup (2025-10-05). Netlify config usunięty - będzie dodany przed deployem.
+
+### Pre-Deploy Checklist:
+- [ ] Backend wdrożony i działający (uzyskaj URL produkcyjny)
+- [ ] W Netlify Panel → Site settings → Environment variables dodaj:
+  - `VITE_API_URL` = `https://twoj-backend-url.com/api`
+  - `VITE_GEMINI_API_KEY` = `twoj-gemini-klucz`
+- [ ] Stwórz czysty `netlify.toml` w root (użyj template poniżej)
+- [ ] Commit i push do GitHub
+- [ ] Netlify auto-deploy lub trigger manual deploy
+- [ ] Zweryfikuj: Health check działa, login działa, Gemini AI działa
+
+### netlify.toml Template (Clean Version):
+```toml
+[build]
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA routing - wszystkie requesty bez pliku → index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers dla wszystkich stron
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self';"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(self), microphone=(), camera=()"
+```
+
+### Deploy Steps:
+1. **Backend First**: Deploy backend na Railway/Render/Fly.io
+2. **Get Backend URL**: Np. `https://tik-backend-prod.railway.app`
+3. **Configure Netlify**: Dodaj env vars w Netlify dashboard
+4. **Add netlify.toml**: Skopiuj template powyżej do root projektu
+5. **Push & Deploy**: `git add netlify.toml && git commit -m "feat: add Netlify config for production deploy" && git push`
+6. **Monitor**: Sprawdź Netlify build logs, test na produkcji
+
+### Post-Deploy Verification:
+```bash
+# Health check
+curl https://twoja-app.netlify.app/
+
+# Backend connectivity
+curl https://twoj-backend.com/api/health
+
+# Frontend → Backend integration
+# Otwórz app w przeglądarce, sprawdź DevTools Network tab
+# Verify: Login działa, businesses się ładują, Gemini chat odpowiada
+```
+
+**📋 Więcej info**: Zobacz `rotations/NETLIFY_CLEANUP_REPORT.md` dla historii cleanup i starych configów.
